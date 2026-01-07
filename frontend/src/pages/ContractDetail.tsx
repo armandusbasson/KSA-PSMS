@@ -11,8 +11,8 @@ export const ContractDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { fetchContract, uploadFile, downloadFile, deleteFile, deleteContract } = useContracts();
-  const { staff } = useStaff();
-  const { sites } = useSites();
+  const { staff, fetchStaff } = useStaff();
+  const { sites, fetchSites } = useSites();
 
   const [contract, setContract] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -24,6 +24,7 @@ export const ContractDetail: React.FC = () => {
     const loadData = async () => {
       if (!id) return;
       try {
+        await Promise.all([fetchStaff(), fetchSites()]);
         const data = await fetchContract(parseInt(id));
         setContract(data);
       } catch (err: any) {
