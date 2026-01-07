@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Plus, Trash2, Edit } from 'lucide-react';
 import { useStaff } from '../hooks/useStaff';
-import { useNavigate } from 'react-router-dom';
 import { Card, Button, LoadingSpinner, ErrorMessage } from '../components/Common';
 import { CreateStaffInput } from '../types';
 import { formatDate, formatFullName } from '../utils/formatters';
@@ -91,7 +90,6 @@ const StaffForm: React.FC<{
 };
 
 export const StaffList: React.FC = () => {
-  const navigate = useNavigate();
   const { staff, loading, error, fetchStaff, createStaffMember, deleteStaffMember } = useStaff();
   const [showForm, setShowForm] = useState(false);
   const [formLoading, setFormLoading] = useState(false);
@@ -177,20 +175,25 @@ export const StaffList: React.FC = () => {
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {filteredStaff.map((member) => (
-                  <tr 
-                    key={member.id} 
-                    className="hover:bg-gray-50 cursor-pointer transition-colors"
-                    onClick={() => navigate(`/staff/${member.id}/edit`)}
-                  >
+                  <tr key={member.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 font-medium text-gray-900">{formatFullName(member.name, member.surname)}</td>
                     <td className="px-6 py-4 text-sm text-gray-600">{member.role || '-'}</td>
                     <td className="px-6 py-4 text-sm text-gray-600">{member.email || '-'}</td>
                     <td className="px-6 py-4 text-sm text-gray-600">{member.phone || '-'}</td>
                     <td className="px-6 py-4 text-sm text-gray-600">{formatDate(member.created_at)}</td>
-                    <td className="px-6 py-4 text-sm" onClick={(e) => e.stopPropagation()}>
+                    <td className="px-6 py-4 text-sm space-x-2">
+                      <Button
+                        variant="secondary"
+                        className="px-3 py-1"
+                        title="Edit staff member"
+                        onClick={() => alert('Edit staff: ' + member.name)}
+                      >
+                        <Edit size={16} />
+                      </Button>
                       <Button
                         variant="destructive"
                         className="px-3 py-1"
+                        title="Delete staff member"
                         onClick={() => handleDelete(member.id)}
                       >
                         <Trash2 size={16} />
