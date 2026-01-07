@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, Edit } from 'lucide-react';
 import { useStaff } from '../hooks/useStaff';
+import { useNavigate } from 'react-router-dom';
 import { Card, Button, LoadingSpinner, ErrorMessage } from '../components/Common';
 import { CreateStaffInput } from '../types';
 import { formatDate, formatFullName } from '../utils/formatters';
@@ -90,6 +91,7 @@ const StaffForm: React.FC<{
 };
 
 export const StaffList: React.FC = () => {
+  const navigate = useNavigate();
   const { staff, loading, error, fetchStaff, createStaffMember, deleteStaffMember } = useStaff();
   const [showForm, setShowForm] = useState(false);
   const [formLoading, setFormLoading] = useState(false);
@@ -175,13 +177,17 @@ export const StaffList: React.FC = () => {
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {filteredStaff.map((member) => (
-                  <tr key={member.id} className="hover:bg-gray-50">
+                  <tr 
+                    key={member.id} 
+                    className="hover:bg-gray-50 cursor-pointer transition-colors"
+                    onClick={() => navigate(`/staff/${member.id}/edit`)}
+                  >
                     <td className="px-6 py-4 font-medium text-gray-900">{formatFullName(member.name, member.surname)}</td>
                     <td className="px-6 py-4 text-sm text-gray-600">{member.role || '-'}</td>
                     <td className="px-6 py-4 text-sm text-gray-600">{member.email || '-'}</td>
                     <td className="px-6 py-4 text-sm text-gray-600">{member.phone || '-'}</td>
                     <td className="px-6 py-4 text-sm text-gray-600">{formatDate(member.created_at)}</td>
-                    <td className="px-6 py-4 text-sm">
+                    <td className="px-6 py-4 text-sm" onClick={(e) => e.stopPropagation()}>
                       <Button
                         variant="destructive"
                         className="px-3 py-1"
