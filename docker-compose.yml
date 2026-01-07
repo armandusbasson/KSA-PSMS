@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    container_name: ksa_backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=sqlite:////app/db/app.db
+      - DEBUG=true
+    volumes:
+      - db_volume:/app/db
+      - uploads_volume:/app/uploads
+    networks:
+      - ksa_network
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+  frontend:
+    build: ./frontend
+    container_name: ksa_frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - VITE_API_BASE_URL=http://localhost:8000
+    networks:
+      - ksa_network
+    depends_on:
+      - backend
+
+volumes:
+  db_volume:
+    driver: local
+  uploads_volume:
+    driver: local
+
+networks:
+  ksa_network:
+    driver: bridge
