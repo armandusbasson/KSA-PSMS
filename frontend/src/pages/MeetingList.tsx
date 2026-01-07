@@ -347,13 +347,17 @@ export const MeetingList: React.FC = () => {
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {meetings.map((meeting) => (
-                  <tr key={meeting.id} className="hover:bg-gray-50">
+                  <tr 
+                    key={meeting.id} 
+                    className="hover:bg-gray-50 cursor-pointer transition-colors"
+                    onClick={() => navigate(`/meetings/${meeting.id}`)}
+                  >
                     <td className="px-6 py-4 font-medium text-gray-900">#{meeting.id}</td>
                     <td className="px-6 py-4 text-sm text-gray-600">{sites.find((s: Site) => s.id === meeting.site_id)?.name ?? meeting.site_id}</td>
                     <td className="px-6 py-4 text-sm text-gray-600">{meeting.agenda?.substring(0, 30)}...</td>
                     <td className="px-6 py-4 text-sm text-gray-600">{meeting.items?.length || 0}</td>
                     <td className="px-6 py-4 text-sm text-gray-600">{formatDate(meeting.created_at)}</td>
-                    <td className="px-6 py-4 text-sm">
+                    <td className="px-6 py-4 text-sm" onClick={(e) => e.stopPropagation()}>
                       <div className="flex items-center gap-2">
                         <Button className="px-3 py-1" onClick={() => navigate(`/meetings/${meeting.id}`)}>
                           <Eye size={16} />
