@@ -131,7 +131,11 @@ export const ContractsList: React.FC = () => {
             </thead>
             <tbody className="divide-y divide-gray-200">
               {filteredContracts.map(contract => (
-                <tr key={contract.id} className="hover:bg-gray-50">
+                <tr 
+                  key={contract.id} 
+                  className="hover:bg-gray-50 cursor-pointer transition-colors"
+                  onClick={() => navigate(`/contracts/${contract.id}/view`)}
+                >
                   <td className="px-6 py-4 text-sm font-medium text-gray-900">
                     {contract.eskom_reference || contract.internal_quotation_number || `Contract #${contract.id}`}
                   </td>
@@ -145,7 +149,7 @@ export const ContractsList: React.FC = () => {
                     </span>
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600">{contract.contact_person_name || '-'}</td>
-                  <td className="px-6 py-4 text-sm space-x-2">
+                  <td className="px-6 py-4 text-sm space-x-2" onClick={(e) => e.stopPropagation()}>
                     <Link to={`/contracts/${contract.id}/edit`} className="inline">
                       <Button variant="secondary" className="px-3 py-1" title="Edit contract">
                         <Edit size={16} />
