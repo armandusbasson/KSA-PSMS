@@ -5,7 +5,7 @@ import { useStaff } from '../hooks/useStaff';
 import { useSites } from '../hooks/useSites';
 import { Card, Button, LoadingSpinner, ErrorMessage } from '../components/Common';
 import { ArrowLeft, Edit, Download, Upload, Trash2 } from 'lucide-react';
-import { formatDate, formatFullName } from '../utils/formatters';
+import { formatDate, formatFullName, formatCurrency } from '../utils/formatters';
 
 export const ContractDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -152,6 +152,12 @@ export const ContractDetail: React.FC = () => {
             <p className="text-sm font-medium text-gray-600 mb-1">Responsible Staff Member</p>
             <p className="text-gray-900">{getStaffName(contract.responsible_staff_id)}</p>
           </div>
+          {contract.contract_value !== null && contract.contract_value !== undefined && (
+            <div>
+              <p className="text-sm font-medium text-gray-600 mb-1">Contract Value</p>
+              <p className="text-gray-900 font-semibold">{formatCurrency(contract.contract_value)}</p>
+            </div>
+          )}
         </div>
       </Card>
 
