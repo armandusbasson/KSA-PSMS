@@ -1,5 +1,5 @@
 from datetime import datetime
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Text, Enum as SQLEnum
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Text, Enum as SQLEnum, Numeric
 from sqlalchemy.orm import relationship
 from app.database import Base
 import enum
@@ -42,6 +42,9 @@ class Contract(Base):
     contact_person_name = Column(String(255), nullable=True)
     contact_person_telephone = Column(String(20), nullable=True)
     contact_person_email = Column(String(255), nullable=True)
+    
+    # Contract value
+    contract_value = Column(Numeric(15, 2), nullable=True)  # Contract value in ZAR
     
     # Notes
     notes = Column(Text, nullable=True)  # General notes about the contract

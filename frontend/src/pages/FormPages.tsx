@@ -510,6 +510,7 @@ export const ContractForm: React.FC = () => {
     contact_person_email: '',
     internal_quotation_number: '',
     internal_invoice_number: '',
+    contract_value: undefined,
     notes: '',
   });
 
@@ -543,6 +544,7 @@ export const ContractForm: React.FC = () => {
           contact_person_email: data.contact_person_email || '',
           internal_quotation_number: data.internal_quotation_number || '',
           internal_invoice_number: data.internal_invoice_number || '',
+          contract_value: data.contract_value || undefined,
           notes: data.notes || '',
         });
       } catch (err: any) {
@@ -677,6 +679,19 @@ export const ContractForm: React.FC = () => {
                 <option key={s.id} value={s.id}>{formatFullName(s.name, s.surname)}</option>
               ))}
             </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Contract Value (ZAR)</label>
+            <input
+              type="number"
+              step="0.01"
+              min="0"
+              value={formData.contract_value || ''}
+              onChange={(e) => setFormData({ ...formData, contract_value: e.target.value ? parseFloat(e.target.value) : undefined })}
+              placeholder="Enter contract value in South African Rand..."
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+            />
           </div>
         </div>
 

@@ -18,6 +18,7 @@ class ContractBase(BaseModel):
     contact_person_email: Optional[EmailStr] = Field(None, description="Contact person email")
     internal_quotation_number: Optional[str] = Field(None, max_length=255, description="Internal quotation number")
     internal_invoice_number: Optional[str] = Field(None, max_length=255, description="Internal invoice number")
+    contract_value: Optional[float] = Field(None, description="Contract value in ZAR (South African Rand)")
     notes: Optional[str] = Field(None, description="General notes about the contract")
 
 
@@ -40,6 +41,7 @@ class ContractUpdate(BaseModel):
     contact_person_email: Optional[EmailStr] = None
     internal_quotation_number: Optional[str] = Field(None, max_length=255)
     internal_invoice_number: Optional[str] = Field(None, max_length=255)
+    contract_value: Optional[float] = None
     notes: Optional[str] = None
 
 
