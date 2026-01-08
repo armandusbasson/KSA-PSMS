@@ -50,6 +50,8 @@ export interface MeetingItem {
   meeting_id?: number;
   issue_discussed: string;
   person_responsible_staff_id?: number;
+  responsible_staff_ids?: number[];
+  responsible_staff?: Array<{ id: number; name: string; surname: string }>;
   target_date?: string;
   invoice_date?: string;
   payment_date?: string;

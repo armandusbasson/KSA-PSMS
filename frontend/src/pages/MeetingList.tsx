@@ -44,11 +44,11 @@ export const MeetingList: React.FC = () => {
       ...items,
       {
         issue_discussed: '',
-        person_responsible_staff_id: undefined,
+        responsible_staff_ids: [],
         target_date: undefined,
         invoice_date: undefined,
         payment_date: undefined,
-      } as MeetingItem,
+      } as any,
     ]);
   };
 
@@ -79,6 +79,15 @@ export const MeetingList: React.FC = () => {
       console.log('DEBUG - attendeeNames array:', attendeeNames);
       console.log('DEBUG - absentNames array:', absentNames);
 
+      // Clean up items to only include fields expected by backend
+      const cleanedItems = items.map((item: any) => ({
+        issue_discussed: item.issue_discussed,
+        responsible_staff_ids: item.responsible_staff_ids || [],
+        target_date: item.target_date || undefined,
+        invoice_date: item.invoice_date || undefined,
+        payment_date: item.payment_date || undefined,
+      }));
+
       const payload: CreateMeetingInput = {
         site_id: parseInt(siteId, 10),
         agenda,
@@ -86,7 +95,7 @@ export const MeetingList: React.FC = () => {
         scheduled_at: scheduledAt,
         attendees: attendeeNames.length ? attendeeNames.join(', ') : '',
         apologies: absentNames.length ? absentNames.join(', ') : '',
-        items,
+        items: cleanedItems as any,
       };
       console.log('Creating meeting with payload:', payload);
       await createMeeting(payload);
@@ -254,59 +263,94 @@ export const MeetingList: React.FC = () => {
             </div>
 
             <div>
-              <h3 className="text-sm font-medium text-gray-700 mb-2">Meeting Items</h3>
-              <div className="grid grid-cols-12 gap-2 items-center text-sm text-gray-600 mb-2">
-                <div className="col-span-5 font-medium">Issue</div>
-                <div className="col-span-3 font-medium">Person Responsible</div>
-                <div className="col-span-2 font-medium">Target Date</div>
-                <div className="col-span-2 font-medium">Invoice / Payment</div>
-              </div>
-              <div className="space-y-2">
+              <h3 className="text-sm font-medium text-gray-700 mb-4">Meeting Items</h3>
+              <div className="space-y-4">
                 {items.map((item, idx) => (
-                  <div key={idx} className="grid grid-cols-12 gap-2 items-start">
-                    <input
-                      type="text"
-                      placeholder="Issue"
-                      value={item.issue_discussed}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateItem(idx, 'issue_discussed', e.target.value)}
-                      className="col-span-5 px-3 py-2 border border-gray-300 rounded text-sm"
-                    />
-
-                    <select
-                      value={item.person_responsible_staff_id ?? ''}
-                      onChange={(e: React.ChangeEvent<HTMLSelectElement>) => updateItem(idx, 'person_responsible_staff_id', e.target.value ? parseInt(e.target.value, 10) : undefined)}
-                      className="col-span-3 px-3 py-2 border border-gray-300 rounded text-sm"
-                    >
-                      <option value="">Person responsible...</option>
-                      {staff.map((s: Staff) => (
-                        <option key={s.id} value={s.id}>{formatFullName(s.name, s.surname)}</option>
-                      ))}
-                    </select>
-
-                    <input
-                      type="date"
-                      value={item.target_date ?? ''}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateItem(idx, 'target_date', e.target.value || undefined)}
-                      className="col-span-2 px-3 py-2 border border-gray-300 rounded text-sm"
-                    />
-
-                    <div className="col-span-2 flex flex-col gap-2">
+                  <div key={idx} className="p-4 border rounded-lg bg-gray-50">
+                    <div className="mb-4">
+                      <label className="block text-xs font-semibold text-gray-700 mb-1 uppercase">Issue Discussed</label>
                       <input
-                        type="date"
-                        value={item.invoice_date ?? ''}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateItem(idx, 'invoice_date', e.target.value || undefined)}
-                        className="px-3 py-2 border border-gray-300 rounded text-sm"
+                        type="text"
+                        placeholder="Describe the issue..."
+                        value={item.issue_discussed}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateItem(idx, 'issue_discussed', e.target.value)}
+                        className="w-full px-3 py-2 border rounded"
                       />
-                      <input
-                        type="date"
-                        value={item.payment_date ?? ''}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateItem(idx, 'payment_date', e.target.value || undefined)}
-                        className="px-3 py-2 border border-gray-300 rounded text-sm"
-                      />
-                      <Button type="button" variant="destructive" className="mt-2 px-2 py-1" onClick={() => removeItem(idx)}>
-                        <Trash2 size={14} />
-                      </Button>
                     </div>
+
+                    <div className="mb-4">
+                      <label className="block text-xs font-semibold text-gray-700 mb-1 uppercase">Staff Responsible</label>
+                      <div className="mb-2 flex gap-2">
+                        <select 
+                          onChange={(e) => {
+                            const staffId = e.target.value ? parseInt(e.target.value, 10) : undefined;
+                            if (staffId && !item.responsible_staff_ids?.includes(staffId)) {
+                              const newIds = [...(item.responsible_staff_ids || []), staffId];
+                              updateItem(idx, 'responsible_staff_ids', newIds);
+                              e.target.value = '';
+                            }
+                          }}
+                          className="flex-1 px-3 py-2 border rounded text-sm"
+                        >
+                          <option value="">Select staff member...</option>
+                          {staff.filter((s: Staff) => !item.responsible_staff_ids?.includes(s.id)).map(s => (
+                            <option key={s.id} value={s.id}>{formatFullName(s.name, s.surname)}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="flex gap-2 flex-wrap">
+                        {(item.responsible_staff_ids || []).map((staffId: number) => {
+                          const staffMember = staff.find((s: Staff) => s.id === staffId);
+                          return staffMember ? (
+                            <div key={staffId} className="px-2 py-1 bg-blue-100 rounded text-xs flex items-center gap-2">
+                              <span>{formatFullName(staffMember.name, staffMember.surname)}</span>
+                              <button 
+                                type="button" 
+                                onClick={() => {
+                                  const newIds = (item.responsible_staff_ids || []).filter((id: number) => id !== staffId);
+                                  updateItem(idx, 'responsible_staff_ids', newIds);
+                                }}
+                                className="text-red-600 font-bold"
+                              >
+                                ✕
+                              </button>
+                            </div>
+                          ) : null;
+                        })}
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-3 mb-4">
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-700 mb-1 uppercase">Target Date</label>
+                        <input
+                          type="date"
+                          value={item.target_date ?? ''}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateItem(idx, 'target_date', e.target.value || undefined)}
+                          className="w-full px-3 py-2 border rounded text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-700 mb-1 uppercase">Invoice Date</label>
+                        <input
+                          type="date"
+                          value={item.invoice_date ?? ''}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateItem(idx, 'invoice_date', e.target.value || undefined)}
+                          className="w-full px-3 py-2 border rounded text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-700 mb-1 uppercase">Payment Date</label>
+                        <input
+                          type="date"
+                          value={item.payment_date ?? ''}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateItem(idx, 'payment_date', e.target.value || undefined)}
+                          className="w-full px-3 py-2 border rounded text-sm"
+                        />
+                      </div>
+                    </div>
+
+                    <Button type="button" variant="destructive" className="w-full" onClick={() => removeItem(idx)}>Remove Item</Button>
                   </div>
                 ))}
               </div>
