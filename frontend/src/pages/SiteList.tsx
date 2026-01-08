@@ -3,11 +3,38 @@ import { Plus, Edit2, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useSites } from '../hooks/useSites';
 import { Card, Button, LoadingSpinner, ErrorMessage } from '../components/Common';
-import { truncate, formatDate } from '../utils/formatters';
+import { truncate } from '../utils/formatters';
+import { meetingService } from '../api/meetingService';
+import { contractService } from '../api/contractService';
 
 export const SiteList: React.FC = () => {
   const { sites, loading, error, fetchSites, deleteSite } = useSites();
   const [searchTerm, setSearchTerm] = useState('');
+  const [siteCounts, setSiteCounts] = useState<{ [key: number]: { meetings: number; contracts: number } }>({});
+
+  useEffect(() => {
+    const loadCounts = async () => {
+      const counts: { [key: number]: { meetings: number; contracts: number } } = {};
+      for (const site of sites) {
+        try {
+          const meetingsData = await meetingService.list(0, 100, site.id);
+          const contractsData = await contractService.getAll(0, 100, site.id);
+          counts[site.id] = {
+            meetings: meetingsData?.length || 0,
+            contracts: contractsData?.length || 0,
+          };
+        } catch (err) {
+          // If fetch fails, default to 0
+          counts[site.id] = { meetings: 0, contracts: 0 };
+        }
+      }
+      setSiteCounts(counts);
+    };
+
+    if (sites.length > 0) {
+      loadCounts();
+    }
+  }, [sites]);
 
   useEffect(() => {
     fetchSites();
@@ -64,7 +91,8 @@ export const SiteList: React.FC = () => {
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Name</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Contact Person</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Contact Number</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Created</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Linked Meetings</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Linked Contracts</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Actions</th>
                 </tr>
               </thead>
@@ -78,7 +106,8 @@ export const SiteList: React.FC = () => {
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-600">{truncate(site.contact_person || '', 40)}</td>
                     <td className="px-6 py-4 text-sm text-gray-600">{truncate(site.contact_number || '', 40)}</td>
-                    <td className="px-6 py-4 text-sm text-gray-600">{formatDate(site.created_at)}</td>
+                    <td className="px-6 py-4 text-sm text-gray-600 font-medium">{siteCounts[site.id]?.meetings || 0}</td>
+                    <td className="px-6 py-4 text-sm text-gray-600 font-medium">{siteCounts[site.id]?.contracts || 0}</td>
                     <td className="px-6 py-4 text-sm space-x-2">
                       <Link to={`/sites/${site.id}/edit`} className="inline">
                         <Button variant="secondary" className="px-3 py-1">
