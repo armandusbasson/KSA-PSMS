@@ -52,6 +52,11 @@ def init_db():
                 conn.execute(text("ALTER TABLE sites ADD COLUMN contact_email VARCHAR(255)"))
             if 'coordinates' not in cols3:
                 conn.execute(text("ALTER TABLE sites ADD COLUMN coordinates VARCHAR(255)"))
+            # Ensure contracts.notes exists
+            res4 = conn.execute(text("PRAGMA table_info('contracts')")).fetchall()
+            cols4 = [r[1] for r in res4]
+            if 'notes' not in cols4:
+                conn.execute(text("ALTER TABLE contracts ADD COLUMN notes TEXT"))
         else:
             # Generic alter try - may succeed on Postgres/MySQL if column doesn't exist
             try:
@@ -68,6 +73,10 @@ def init_db():
                 conn.execute(text("ALTER TABLE sites ADD COLUMN contact_number VARCHAR(20)"))
                 conn.execute(text("ALTER TABLE sites ADD COLUMN contact_email VARCHAR(255)"))
                 conn.execute(text("ALTER TABLE sites ADD COLUMN coordinates VARCHAR(255)"))
+            except Exception:
+                pass
+            try:
+                conn.execute(text("ALTER TABLE contracts ADD COLUMN notes TEXT"))
             except Exception:
                 pass
     finally:
