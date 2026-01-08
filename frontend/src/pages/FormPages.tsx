@@ -143,11 +143,12 @@ export const MeetingForm: React.FC = () => {
   const { id } = useParams();
   const isEdit = Boolean(id);
   const navigate = useNavigate();
+  const [searchParams] = React.useMemo(() => [new URLSearchParams(window.location.search)], []);
   const { createMeeting, updateMeeting } = useMeetings();
   const { sites, fetchSites } = useSites();
   const { staff, fetchStaff } = useStaff();
 
-  const [siteId, setSiteId] = useState<string | undefined>(undefined);
+  const [siteId, setSiteId] = useState<string | undefined>(searchParams.get('site_id') || undefined);
   const [agenda, setAgenda] = useState('');
   const [chairpersonId, setChairpersonId] = useState<string | undefined>(undefined);
   const [items, setItems] = useState<any[]>([]);
