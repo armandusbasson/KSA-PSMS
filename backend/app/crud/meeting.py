@@ -77,8 +77,9 @@ def update_meeting(db: Session, meeting_id: int, meeting: MeetingUpdate) -> Opti
     
     # Update items if provided
     if meeting.items is not None:
-        # Delete existing items
-        db.query(MeetingItem).filter(MeetingItem.meeting_id == meeting_id).delete()
+        # Delete existing items (this cascades to junction table entries)
+        db.query(MeetingItem).filter(MeetingItem.meeting_id == meeting_id).delete(synchronize_session=False)
+        db.flush()
         
         # Add new items
         for item in meeting.items:
