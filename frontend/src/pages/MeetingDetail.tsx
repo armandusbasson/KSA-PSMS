@@ -12,7 +12,6 @@ export const MeetingDetail: React.FC = () => {
   const [meeting, setMeeting] = useState<any | null>(null);
   const [site, setSite] = useState<any | null>(null);
   const [chair, setChair] = useState<any | null>(null);
-  const [staff, setStaff] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -26,9 +25,6 @@ export const MeetingDetail: React.FC = () => {
         setMeeting(m);
         const s = await siteService.get(m.site_id);
         setSite(s);
-        // load staff list to map responsible persons
-        const allStaff = await staffService.list();
-        setStaff(allStaff);
         if (m.chairperson_staff_id) {
           const c = await staffService.get(m.chairperson_staff_id);
           setChair(c);
@@ -92,7 +88,7 @@ export const MeetingDetail: React.FC = () => {
                 <thead className="bg-gray-50 border-b">
                   <tr>
                     <th className="px-3 py-2 text-left">Issue</th>
-                    <th className="px-3 py-2 text-left">Person Responsible</th>
+                    <th className="px-3 py-2 text-left">Staff Responsible</th>
                     <th className="px-3 py-2 text-left">Target Date</th>
                     <th className="px-3 py-2 text-left">Invoice Date</th>
                     <th className="px-3 py-2 text-left">Payment Date</th>
@@ -100,11 +96,22 @@ export const MeetingDetail: React.FC = () => {
                 </thead>
                 <tbody className="divide-y">
                   {meeting.items.map((it: any) => {
-                    const resp = staff.find((s: any) => s.id === it.person_responsible_staff_id);
                     return (
                       <tr key={it.id || Math.random()}>
                         <td className="px-3 py-2 align-top">{it.issue_discussed}</td>
-                        <td className="px-3 py-2 align-top">{resp ? formatFullName(resp.name, resp.surname) : '—'}</td>
+                        <td className="px-3 py-2 align-top">
+                          {it.responsible_staff && it.responsible_staff.length > 0 ? (
+                            <div className="flex flex-wrap gap-1">
+                              {it.responsible_staff.map((s: any) => (
+                                <span key={s.id} className="inline-block px-2 py-1 bg-blue-100 rounded text-xs">
+                                  {formatFullName(s.name, s.surname)}
+                                </span>
+                              ))}
+                            </div>
+                          ) : (
+                            '—'
+                          )}
+                        </td>
                         <td className="px-3 py-2 align-top">{it.target_date ? formatDate(it.target_date) : '—'}</td>
                         <td className="px-3 py-2 align-top">{it.invoice_date ? formatDate(it.invoice_date) : '—'}</td>
                         <td className="px-3 py-2 align-top">{it.payment_date ? formatDate(it.payment_date) : '—'}</td>
