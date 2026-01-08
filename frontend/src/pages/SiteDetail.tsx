@@ -154,7 +154,7 @@ export const SiteDetail: React.FC = () => {
       </Card>
 
       {/* Linked Meetings */}
-      <Card>
+      <Card className="mb-6">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold">Linked Meetings ({siteMeetings.length})</h2>
           <Button onClick={() => navigate(`/meetings/new?site_id=${site.id}`)}>
