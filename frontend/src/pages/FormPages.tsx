@@ -178,7 +178,14 @@ export const MeetingForm: React.FC = () => {
         setSiteId(data.site_id.toString());
         setAgenda(data.agenda || '');
         setChairpersonId(data.chairperson_staff_id ? data.chairperson_staff_id.toString() : undefined);
-        setItems(data.items || []);
+        
+        // Transform items: convert responsible_staff array to responsible_staff_ids array
+        const transformedItems = (data.items || []).map((item: any) => ({
+          ...item,
+          responsible_staff_ids: item.responsible_staff ? item.responsible_staff.map((s: any) => s.id) : [],
+        }));
+        setItems(transformedItems);
+        
         // scheduled_at -> date/time
         if (data.scheduled_at) {
           const [d, t] = data.scheduled_at.split('T');
@@ -237,6 +244,15 @@ export const MeetingForm: React.FC = () => {
 
       const scheduled_at = meetingDate ? (meetingTime ? `${meetingDate}T${meetingTime}:00` : `${meetingDate}T00:00:00`) : undefined;
 
+      // Clean up items to only include fields expected by backend
+      const cleanedItems = items.map((item: any) => ({
+        issue_discussed: item.issue_discussed,
+        responsible_staff_ids: item.responsible_staff_ids || [],
+        target_date: item.target_date || undefined,
+        invoice_date: item.invoice_date || undefined,
+        payment_date: item.payment_date || undefined,
+      }));
+
       const payload = {
         site_id: parseInt(siteId, 10),
         agenda,
@@ -244,7 +260,7 @@ export const MeetingForm: React.FC = () => {
         scheduled_at,
         attendees: attendeeNames || '',
         apologies: absentNames || '',
-        items,
+        items: cleanedItems,
       };
       console.log('FormPages payload:', payload);
       if (isEdit && id) {

@@ -80,6 +80,7 @@ def update_meeting(db: Session, meeting_id: int, meeting: MeetingUpdate) -> Opti
         # Delete existing items (this cascades to junction table entries)
         db.query(MeetingItem).filter(MeetingItem.meeting_id == meeting_id).delete(synchronize_session=False)
         db.flush()
+        db.expunge_all()  # Clear the session to avoid conflicts
         
         # Add new items
         for item in meeting.items:
