@@ -215,6 +215,13 @@ export const ContractDetail: React.FC = () => {
         </Card>
       )}
 
+      {contract.notes && (
+        <Card className="mb-6">
+          <h2 className="text-xl font-semibold mb-4">Notes</h2>
+          <p className="text-gray-700 whitespace-pre-wrap">{contract.notes}</p>
+        </Card>
+      )}
+
       <Card>
         <h2 className="text-xl font-semibold mb-4">Contract Document</h2>
         {fileError && <ErrorMessage message={fileError} />}

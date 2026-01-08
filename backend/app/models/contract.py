@@ -43,6 +43,9 @@ class Contract(Base):
     contact_person_telephone = Column(String(20), nullable=True)
     contact_person_email = Column(String(255), nullable=True)
     
+    # Notes
+    notes = Column(Text, nullable=True)  # General notes about the contract
+    
     # File storage
     document_filename = Column(String(255), nullable=True)  # Original filename
     document_path = Column(String(500), nullable=True)  # Server path to uploaded file

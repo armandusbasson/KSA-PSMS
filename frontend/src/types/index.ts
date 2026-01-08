@@ -141,6 +141,7 @@ export interface Contract {
   contact_person_email?: string;
   internal_quotation_number?: string;
   internal_invoice_number?: string;
+  notes?: string;
   document_filename?: string;
   document_path?: string;
   created_at: string;
@@ -166,6 +167,7 @@ export interface CreateContractInput {
   contact_person_email?: string;
   internal_quotation_number?: string;
   internal_invoice_number?: string;
+  notes?: string;
 }
 
 export interface UpdateContractInput {
@@ -181,6 +183,7 @@ export interface UpdateContractInput {
   contact_person_email?: string;
   internal_quotation_number?: string;
   internal_invoice_number?: string;
+  notes?: string;
 }
 
 export interface ContractSummary {

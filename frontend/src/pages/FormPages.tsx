@@ -509,6 +509,7 @@ export const ContractForm: React.FC = () => {
     contact_person_email: '',
     internal_quotation_number: '',
     internal_invoice_number: '',
+    notes: '',
   });
 
   const [loading, setLoading] = useState(false);
@@ -541,6 +542,7 @@ export const ContractForm: React.FC = () => {
           contact_person_email: data.contact_person_email || '',
           internal_quotation_number: data.internal_quotation_number || '',
           internal_invoice_number: data.internal_invoice_number || '',
+          notes: data.notes || '',
         });
       } catch (err: any) {
         setError(err.message || 'Failed to load contract');
@@ -744,6 +746,20 @@ export const ContractForm: React.FC = () => {
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
               />
             </div>
+          </div>
+        </div>
+
+        <div className="border-t pt-4">
+          <h3 className="text-lg font-semibold text-gray-800 mb-3">Notes</h3>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">General Notes</label>
+            <textarea
+              value={formData.notes}
+              onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+              placeholder="Add any general notes about this contract..."
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+              rows={4}
+            />
           </div>
         </div>
 
