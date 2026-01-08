@@ -4,7 +4,7 @@ import { useContracts } from '../hooks/useContracts';
 import { useSites } from '../hooks/useSites';
 import { Card, Button, LoadingSpinner, ErrorMessage } from '../components/Common';
 import { Plus, Edit, Trash2, Download, FileText } from 'lucide-react';
-import { formatDate } from '../utils/formatters';
+import { formatDate, formatCurrency } from '../utils/formatters';
 import { Contract, ContractStatus } from '../types';
 
 export const ContractsList: React.FC = () => {
@@ -127,6 +127,7 @@ export const ContractsList: React.FC = () => {
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">End Date</th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Contact</th>
+                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Value (ZAR)</th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Actions</th>
               </tr>
             </thead>
@@ -150,6 +151,7 @@ export const ContractsList: React.FC = () => {
                     </span>
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600">{contract.contact_person_name || '-'}</td>
+                  <td className="px-6 py-4 text-sm text-gray-600 font-medium">{contract.contract_value ? formatCurrency(contract.contract_value) : '-'}</td>
                   <td className="px-6 py-4 text-sm space-x-2" onClick={(e) => e.stopPropagation()}>
                     <Link to={`/contracts/${contract.id}/edit`} className="inline">
                       <Button variant="secondary" className="px-3 py-1" title="Edit contract">
