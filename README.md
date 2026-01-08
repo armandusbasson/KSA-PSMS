@@ -43,11 +43,20 @@ ksa-custom-erp-2/
   - Manage dynamic agenda items
 - **Meeting Items:** Track action items with:
   - Issue description
-  - Assigned responsible person (staff member)
+  - Multiple responsible staff members (many-to-many relationship)
   - Target completion date
   - Invoice date (for financial tracking)
   - Payment date (for reconciliation)
-- **Dashboard:** Quick overview of sites, staff, and meetings
+  - Displays all responsible staff as pill badges
+- **Contract Management:** Create, update, and track contracts with:
+  - Contract type (Supply or Service)
+  - Status tracking (Active, Expired, Completed, Cancelled)
+  - Reference numbers (Eskom, internal quotation, invoice)
+  - Contact information
+  - General notes for each contract
+  - Document upload and download
+  - Dashboard with split view by contract type
+- **Dashboard:** Quick overview of sites, staff, meetings, and contracts
 - **Persistent Database:** SQLite database with Docker volume mounting
 - **Full Name Display:** Staff names shown with surname throughout the UI
 
@@ -147,12 +156,42 @@ The SQLite database is stored in `/app/db/app.db` inside the backend container a
   "items": [
     {
       "issue_discussed": "Item description",
-      "person_responsible_staff_id": 2,
+      "responsible_staff_ids": [2, 3],
       "target_date": "2026-01-15",
       "invoice_date": "2026-01-20",
       "payment_date": "2026-02-05"
     }
   ]
+}
+```
+
+### Contracts
+- `GET /api/contracts` - List all contracts
+- `POST /api/contracts` - Create new contract
+- `GET /api/contracts/{id}` - Get contract details
+- `PUT /api/contracts/{id}` - Update contract
+- `DELETE /api/contracts/{id}` - Delete contract
+- `GET /api/contracts/summary/by-type` - Get contracts summary split by type
+- `POST /api/contracts/{id}/upload` - Upload contract document
+- `GET /api/contracts/{id}/download` - Download contract document
+- `DELETE /api/contracts/{id}/document` - Delete contract document
+
+**Contract Create/Update Payload:**
+```json
+{
+  "contract_type": "Supply",
+  "status": "Active",
+  "start_date": "2026-01-01T00:00:00",
+  "end_date": "2027-01-01T00:00:00",
+  "site_id": 1,
+  "responsible_staff_id": 1,
+  "eskom_reference": "ESK-123456",
+  "contact_person_name": "John Doe",
+  "contact_person_telephone": "+27123456789",
+  "contact_person_email": "john@example.com",
+  "internal_quotation_number": "QT-001",
+  "internal_invoice_number": "INV-001",
+  "notes": "General notes about the contract"
 }
 ```
 
@@ -163,21 +202,35 @@ The SQLite database is stored in `/app/db/app.db` inside the backend container a
 - **Site Detail:** View site information, assigned staff, and linked meetings
 - **Staff List:** Manage all staff members with surnames
 - **Meetings:** Create and manage meetings
-  - **List View:** Browse meetings, quick create inline form
-  - **Create/Edit:** Full form for scheduling meetings, managing attendees, adding items
-  - **Detail View:** View complete meeting information with items, attendees, dates
+  - **List View:** Browse meetings, quick create inline form with multi-select staff
+  - **Create/Edit:** Full form for scheduling meetings, managing attendees, adding items with multi-select responsible staff
+  - **Detail View:** View complete meeting information with items displaying all responsible staff as badges
 - **Meeting Items:** Dynamic agenda items with:
   - Issue description
-  - Assigned person
-  - Target, invoice, and payment dates
+  - Multiple responsible staff members (multi-select with add/remove)
+  - Target, invoice, and payment dates (aligned in 3-column grid)
+- **Contracts:** Browse, create, and manage contracts
+  - **List View:** Table view with filtering and status badges
+  - **Create/Edit:** Full form with contract details, reference numbers, contact info, and notes
+  - **Detail View:** Complete contract information with status, dates, contact details, notes, and document management
+  - **Dashboard View:** Split by contract type (Supply vs Service) with summary cards
 
 ## Quick Start for New Features
 
 See [MEETING_FEATURES_QUICKSTART.md](MEETING_FEATURES_QUICKSTART.md) for a detailed guide on:
-- Creating and editing meetings
+- Creating and editing meetings with multi-staff assignments
 - Scheduling with date/time
 - Managing attendees and absences
-- Tracking action items with multiple dates
+- Tracking action items with multiple responsible staff members
+- Using aligned date fields for target, invoice, and payment dates
+
+For contracts, key features include:
+- Contract type selection (Supply or Service)
+- Status tracking and management
+- Reference number tracking (Eskom, internal quotation, invoice)
+- Contact person information
+- General notes for contract details
+- Document upload, download, and management
 
 ## Implementation Status
 
