@@ -37,6 +37,11 @@ export const contractService = {
     return response.data;
   },
 
+  async getSummaryByType(type: 'Supply' | 'Service'): Promise<any> {
+    const response = await client.get(`/api/contracts/summary/by-type/${type}`);
+    return response.data;
+  },
+
   async getOverdue(): Promise<Contract[]> {
     const response = await client.get('/api/contracts/overdue');
     return response.data;

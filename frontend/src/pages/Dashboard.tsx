@@ -14,14 +14,17 @@ export const Dashboard: React.FC = () => {
   const { sites, loading: sitesLoading, fetchSites } = useSites();
   const { staff, loading: staffLoading, fetchStaff } = useStaff();
   const { meetings, loading: meetingsLoading, fetchMeetings } = useMeetings();
-  const { summary: contractSummary, loading: contractsLoading, fetchSummary: fetchContractSummary } = useContracts();
+  const { summary: contractSummary, supplySummary, serviceSummary, loading: contractsLoading, fetchSummary: fetchContractSummary, fetchSummaryByType } = useContracts();
   const [contractStats, setContractStats] = useState<ContractSummary | null>(null);
+  const [supplyStats, setSupplyStats] = useState<any>(null);
+  const [serviceStats, setServiceStats] = useState<any>(null);
 
   useEffect(() => {
     fetchSites();
     fetchStaff();
     fetchMeetings();
     fetchContractSummary();
+    fetchSummaryByType();
   }, []);
 
   useEffect(() => {
@@ -29,6 +32,18 @@ export const Dashboard: React.FC = () => {
       setContractStats(contractSummary);
     }
   }, [contractSummary]);
+
+  useEffect(() => {
+    if (supplySummary) {
+      setSupplyStats(supplySummary);
+    }
+  }, [supplySummary]);
+
+  useEffect(() => {
+    if (serviceSummary) {
+      setServiceStats(serviceSummary);
+    }
+  }, [serviceSummary]);
 
   const loading = sitesLoading || staffLoading || meetingsLoading || contractsLoading;
 
@@ -83,8 +98,58 @@ export const Dashboard: React.FC = () => {
             </Card>
           </div>
 
-          {/* Contract Status Summary */}
-          {contractStats && contractStats.total_contracts > 0 && (
+          {/* Supply Contracts Status Summary */}
+          {supplyStats && supplyStats.total_contracts > 0 && (
+            <Card className="mb-8">
+              <h2 className="text-xl font-semibold mb-4">Supply Contracts</h2>
+              <div className="grid grid-cols-4 gap-4">
+                <div className="p-4 bg-green-50 rounded-lg">
+                  <p className="text-sm text-gray-600">Active</p>
+                  <p className="text-2xl font-bold text-green-600">{supplyStats.active_count}</p>
+                </div>
+                <div className="p-4 bg-yellow-50 rounded-lg">
+                  <p className="text-sm text-gray-600">Expired</p>
+                  <p className="text-2xl font-bold text-yellow-600">{supplyStats.expired_count}</p>
+                </div>
+                <div className="p-4 bg-blue-50 rounded-lg">
+                  <p className="text-sm text-gray-600">Completed</p>
+                  <p className="text-2xl font-bold text-blue-600">{supplyStats.completed_count}</p>
+                </div>
+                <div className="p-4 bg-red-50 rounded-lg">
+                  <p className="text-sm text-gray-600">Cancelled</p>
+                  <p className="text-2xl font-bold text-red-600">{supplyStats.cancelled_count}</p>
+                </div>
+              </div>
+            </Card>
+          )}
+
+          {/* Service Contracts Status Summary */}
+          {serviceStats && serviceStats.total_contracts > 0 && (
+            <Card className="mb-8">
+              <h2 className="text-xl font-semibold mb-4">Service Contracts</h2>
+              <div className="grid grid-cols-4 gap-4">
+                <div className="p-4 bg-green-50 rounded-lg">
+                  <p className="text-sm text-gray-600">Active</p>
+                  <p className="text-2xl font-bold text-green-600">{serviceStats.active_count}</p>
+                </div>
+                <div className="p-4 bg-yellow-50 rounded-lg">
+                  <p className="text-sm text-gray-600">Expired</p>
+                  <p className="text-2xl font-bold text-yellow-600">{serviceStats.expired_count}</p>
+                </div>
+                <div className="p-4 bg-blue-50 rounded-lg">
+                  <p className="text-sm text-gray-600">Completed</p>
+                  <p className="text-2xl font-bold text-blue-600">{serviceStats.completed_count}</p>
+                </div>
+                <div className="p-4 bg-red-50 rounded-lg">
+                  <p className="text-sm text-gray-600">Cancelled</p>
+                  <p className="text-2xl font-bold text-red-600">{serviceStats.cancelled_count}</p>
+                </div>
+              </div>
+            </Card>
+          )}
+
+          {/* Fallback if no contract type summaries are available */}
+          {contractStats && contractStats.total_contracts > 0 && !supplyStats && !serviceStats && (
             <Card className="mb-8">
               <h2 className="text-xl font-semibold mb-4">Contract Status Summary</h2>
               <div className="grid grid-cols-4 gap-4">

@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Plus, Trash2, Edit } from 'lucide-react';
+import { Plus, Trash2, Edit, X } from 'lucide-react';
 import { useStaff } from '../hooks/useStaff';
 import { Card, Button, LoadingSpinner, ErrorMessage } from '../components/Common';
-import { CreateStaffInput } from '../types';
+import { CreateStaffInput, Staff } from '../types';
 import { formatDate, formatFullName } from '../utils/formatters';
 
 const StaffForm: React.FC<{
@@ -90,10 +90,18 @@ const StaffForm: React.FC<{
 };
 
 export const StaffList: React.FC = () => {
-  const { staff, loading, error, fetchStaff, createStaffMember, deleteStaffMember } = useStaff();
+  const { staff, loading, error, fetchStaff, createStaffMember, updateStaffMember, deleteStaffMember } = useStaff();
   const [showForm, setShowForm] = useState(false);
   const [formLoading, setFormLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [editingStaff, setEditingStaff] = useState<Staff | null>(null);
+  const [editFormData, setEditFormData] = useState<CreateStaffInput>({
+    name: '',
+    surname: '',
+    role: '',
+    email: '',
+    phone: '',
+  });
 
   useEffect(() => {
     fetchStaff();
@@ -119,6 +127,36 @@ export const StaffList: React.FC = () => {
         // Error is handled
       }
     }
+  };
+
+  const handleEditClick = (member: Staff) => {
+    setEditingStaff(member);
+    setEditFormData({
+      name: member.name,
+      surname: member.surname || undefined,
+      role: member.role || undefined,
+      email: member.email || undefined,
+      phone: member.phone || undefined,
+    });
+  };
+
+  const handleEditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingStaff) return;
+
+    setFormLoading(true);
+    try {
+      await updateStaffMember(editingStaff.id, editFormData);
+      setEditingStaff(null);
+    } catch {
+      // Error is handled by hook
+    } finally {
+      setFormLoading(false);
+    }
+  };
+
+  const handleEditCancel = () => {
+    setEditingStaff(null);
   };
 
   const filteredStaff = staff.filter(s =>
@@ -186,7 +224,7 @@ export const StaffList: React.FC = () => {
                         variant="secondary"
                         className="px-3 py-1"
                         title="Edit staff member"
-                        onClick={() => alert('Edit staff: ' + member.name)}
+                        onClick={() => handleEditClick(member)}
                       >
                         <Edit size={16} />
                       </Button>
@@ -206,6 +244,82 @@ export const StaffList: React.FC = () => {
           </div>
         )}
       </Card>
+
+      {/* Edit Modal */}
+      {editingStaff && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <Card className="w-full max-w-md">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold">Edit Staff Member</h2>
+              <button
+                onClick={handleEditCancel}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            <form onSubmit={handleEditSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Name *</label>
+                <input
+                  type="text"
+                  required
+                  value={editFormData.name}
+                  onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Surname</label>
+                <input
+                  type="text"
+                  value={editFormData.surname || ''}
+                  onChange={(e) => setEditFormData({ ...editFormData, surname: e.target.value || undefined })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
+                  <input
+                    type="text"
+                    value={editFormData.role || ''}
+                    onChange={(e) => setEditFormData({ ...editFormData, role: e.target.value || undefined })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                  <input
+                    type="email"
+                    value={editFormData.email || ''}
+                    onChange={(e) => setEditFormData({ ...editFormData, email: e.target.value || undefined })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                <input
+                  type="tel"
+                  value={editFormData.phone || ''}
+                  onChange={(e) => setEditFormData({ ...editFormData, phone: e.target.value || undefined })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+                />
+              </div>
+              <div className="flex gap-3 mt-6">
+                <Button type="submit" disabled={formLoading}>
+                  {formLoading ? 'Saving...' : 'Save Changes'}
+                </Button>
+                <Button type="button" variant="secondary" onClick={handleEditCancel}>
+                  Cancel
+                </Button>
+              </div>
+            </form>
+          </Card>
+        </div>
+      )}
     </div>
   );
 };

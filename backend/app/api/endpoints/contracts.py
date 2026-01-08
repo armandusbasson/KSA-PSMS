@@ -53,6 +53,17 @@ def get_contracts_summary(db: Session = Depends(get_db)):
     return summary
 
 
+@router.get("/summary/by-type/{contract_type}", response_model=dict)
+def get_contracts_summary_by_type(contract_type: str, db: Session = Depends(get_db)):
+    """Get contract statistics summary filtered by type (Supply or Service)"""
+    # Update any expired contracts before getting summary
+    crud_contract.update_expired_contracts(db)
+    if contract_type not in ["Supply", "Service"]:
+        raise HTTPException(status_code=400, detail="Invalid contract type. Use 'Supply' or 'Service'")
+    summary = crud_contract.get_contract_summary_by_type(db, contract_type)
+    return summary
+
+
 @router.get("/overdue", response_model=list[ContractResponse])
 def get_overdue_contracts(db: Session = Depends(get_db)):
     """Get all overdue contracts (Active status past end_date)"""

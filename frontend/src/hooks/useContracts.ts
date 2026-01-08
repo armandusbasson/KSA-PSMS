@@ -5,6 +5,8 @@ import { contractService } from '../api/contractService';
 export const useContracts = () => {
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [summary, setSummary] = useState<ContractSummary | null>(null);
+  const [supplySummary, setSupplySummary] = useState<any>(null);
+  const [serviceSummary, setServiceSummary] = useState<any>(null);
   const [overdue, setOverdue] = useState<Contract[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -29,6 +31,19 @@ export const useContracts = () => {
       setSummary(data);
     } catch (err: any) {
       console.error('Error fetching contract summary:', err);
+    }
+  }, []);
+
+  const fetchSummaryByType = useCallback(async () => {
+    try {
+      const [supply, service] = await Promise.all([
+        contractService.getSummaryByType('Supply'),
+        contractService.getSummaryByType('Service'),
+      ]);
+      setSupplySummary(supply);
+      setServiceSummary(service);
+    } catch (err: any) {
+      console.error('Error fetching contract summary by type:', err);
     }
   }, []);
 
@@ -165,11 +180,14 @@ export const useContracts = () => {
   return {
     contracts,
     summary,
+    supplySummary,
+    serviceSummary,
     overdue,
     loading,
     error,
     fetchContracts,
     fetchSummary,
+    fetchSummaryByType,
     fetchOverdue,
     fetchContract,
     createContract,

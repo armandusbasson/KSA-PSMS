@@ -159,3 +159,41 @@ def get_contract_summary(db: Session) -> dict:
         "cancelled_count": cancelled,
         "overdue_count": overdue,
     }
+
+
+def get_contract_summary_by_type(db: Session, contract_type: str) -> dict:
+    """Get summary statistics for contracts filtered by type"""
+    total = db.query(Contract).filter(Contract.contract_type == contract_type).count()
+    active = db.query(Contract).filter(
+        and_(
+            Contract.contract_type == contract_type,
+            Contract.status == ContractStatus.ACTIVE
+        )
+    ).count()
+    expired = db.query(Contract).filter(
+        and_(
+            Contract.contract_type == contract_type,
+            Contract.status == ContractStatus.EXPIRED
+        )
+    ).count()
+    completed = db.query(Contract).filter(
+        and_(
+            Contract.contract_type == contract_type,
+            Contract.status == ContractStatus.COMPLETED
+        )
+    ).count()
+    cancelled = db.query(Contract).filter(
+        and_(
+            Contract.contract_type == contract_type,
+            Contract.status == ContractStatus.CANCELLED
+        )
+    ).count()
+    
+    return {
+        "total_contracts": total,
+        "active_count": active,
+        "expired_count": expired,
+        "completed_count": completed,
+        "cancelled_count": cancelled,
+        "contract_type": contract_type,
+    }
