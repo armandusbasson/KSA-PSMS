@@ -25,6 +25,9 @@ export const MeetingList: React.FC = () => {
   const [selectedAbsentees, setSelectedAbsentees] = useState<{ id: number; name: string }[]>([]);
   const [absentSelect, setAbsentSelect] = useState<string | undefined>(undefined);
   const [formLoading, setFormLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [siteFilter, setSiteFilter] = useState<string>('');
+  const [filteredMeetings, setFilteredMeetings] = useState<any[]>([]);
 
   useEffect(() => {
     fetchMeetings();
@@ -33,11 +36,23 @@ export const MeetingList: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (showForm) {
-      fetchStaff();
-      fetchSites();
+    let filtered = meetings;
+
+    // Filter by site
+    if (siteFilter) {
+      filtered = filtered.filter(m => m.site_id.toString() === siteFilter);
     }
-  }, [showForm]);
+
+    // Search by agenda
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      filtered = filtered.filter(m =>
+        m.agenda?.toLowerCase().includes(term)
+      );
+    }
+
+    setFilteredMeetings(filtered);
+  }, [meetings, siteFilter, searchTerm]);
 
   const addItem = () => {
     setItems([
@@ -371,11 +386,37 @@ export const MeetingList: React.FC = () => {
         </Card>
       )}
 
+      <Card className="mb-6">
+        <div className="flex gap-4">
+          <div className="flex-1">
+            <input
+              type="text"
+              placeholder="Search by agenda..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+            />
+          </div>
+          <select
+            value={siteFilter}
+            onChange={(e) => setSiteFilter(e.target.value)}
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+          >
+            <option value="">All Sites</option>
+            {sites.map((site: Site) => (
+              <option key={site.id} value={site.id.toString()}>{site.name}</option>
+            ))}
+          </select>
+        </div>
+      </Card>
+
       <Card>
         {loading ? (
           <LoadingSpinner />
-        ) : meetings.length === 0 ? (
-          <p className="text-gray-500 text-center py-8">No meetings found</p>
+        ) : filteredMeetings.length === 0 ? (
+          <p className="text-gray-500 text-center py-8">
+            {searchTerm || siteFilter ? 'No meetings match your filters.' : 'No meetings found. Create one to get started.'}
+          </p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
@@ -390,7 +431,7 @@ export const MeetingList: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {meetings.map((meeting) => (
+                {filteredMeetings.map((meeting) => (
                   <tr 
                     key={meeting.id} 
                     className="hover:bg-gray-50 cursor-pointer transition-colors"
@@ -428,3 +469,5 @@ export const MeetingList: React.FC = () => {
     </div>
   );
 };
+
+export default MeetingList;
