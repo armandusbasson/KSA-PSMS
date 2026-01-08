@@ -58,29 +58,32 @@ def list_meetings(db: Session, skip: int = 0, limit: int = 100, site_id: Optiona
 
 def update_meeting(db: Session, meeting_id: int, meeting: MeetingUpdate) -> Optional[Meeting]:
     """Update a meeting and its items"""
-    db_meeting = get_meeting(db, meeting_id)
+    db_meeting = db.query(Meeting).filter(Meeting.id == meeting_id).first()
     if not db_meeting:
         return None
     
     # Update meeting fields
-    update_data = {
-        "agenda": meeting.agenda,
-        "attendees": meeting.attendees,
-        "apologies": meeting.apologies,
-        "chairperson_staff_id": meeting.chairperson_staff_id,
-        "introduction": meeting.introduction,
-        "scheduled_at": meeting.scheduled_at,
-    }
-    for key, value in update_data.items():
-        if value is not None:
-            setattr(db_meeting, key, value)
+    if meeting.agenda is not None:
+        db_meeting.agenda = meeting.agenda
+    if meeting.attendees is not None:
+        db_meeting.attendees = meeting.attendees
+    if meeting.apologies is not None:
+        db_meeting.apologies = meeting.apologies
+    if meeting.chairperson_staff_id is not None:
+        db_meeting.chairperson_staff_id = meeting.chairperson_staff_id
+    if meeting.introduction is not None:
+        db_meeting.introduction = meeting.introduction
+    if meeting.scheduled_at is not None:
+        db_meeting.scheduled_at = meeting.scheduled_at
     
-    # Update items if provided
+    db.add(db_meeting)
+    db.commit()
+    
+    # Update items if provided - do this in a separate transaction
     if meeting.items is not None:
         # Delete existing items (this cascades to junction table entries)
         db.query(MeetingItem).filter(MeetingItem.meeting_id == meeting_id).delete(synchronize_session=False)
-        db.flush()
-        db.expunge_all()  # Clear the session to avoid conflicts
+        db.commit()
         
         # Add new items
         for item in meeting.items:
@@ -91,14 +94,25 @@ def update_meeting(db: Session, meeting_id: int, meeting: MeetingUpdate) -> Opti
                 invoice_date=item.invoice_date,
                 payment_date=item.payment_date,
             )
-            # Add responsible staff
+            db.add(db_item)
+        
+        db.commit()
+        
+        # Now add responsible staff relationships
+        for idx, item in enumerate(meeting.items):
             if item.responsible_staff_ids:
+                # Get the newly created item
+                db_item = db.query(MeetingItem).filter(
+                    MeetingItem.meeting_id == meeting_id
+                ).order_by(MeetingItem.id).all()[idx]
+                
+                # Get staff members
                 responsible_staff = db.query(Staff).filter(Staff.id.in_(item.responsible_staff_ids)).all()
                 db_item.responsible_staff = responsible_staff
-            db.add(db_item)
+                db.add(db_item)
+        
+        db.commit()
     
-    db.add(db_meeting)
-    db.commit()
     db.refresh(db_meeting)
     return db_meeting
 
