@@ -6,7 +6,7 @@ import { useMeetings } from '../hooks/useMeetings';
 import { Card, Button, LoadingSpinner, ErrorMessage } from '../components/Common';
 import { ArrowLeft, Plus, Eye, Edit, Trash2 } from 'lucide-react';
 import { siteService } from '../api/siteService';
-import { formatDate, formatFullName } from '../utils/formatters';
+import { formatDate, formatFullName, formatCurrency } from '../utils/formatters';
 import { Contract } from '../types';
 
 export const SiteDetail: React.FC = () => {
@@ -220,8 +220,9 @@ export const SiteDetail: React.FC = () => {
             <div className="grid grid-cols-12 gap-4 text-sm font-semibold text-gray-700 mb-2 px-4 py-2">
               <div className="col-span-2">Reference</div>
               <div className="col-span-2">Type</div>
-              <div className="col-span-4">Period</div>
-              <div className="col-span-3">Contact</div>
+              <div className="col-span-3">Period</div>
+              <div className="col-span-2">Value (ZAR)</div>
+              <div className="col-span-2">Contact</div>
               <div className="col-span-1 text-right">Status</div>
             </div>
             
@@ -240,10 +241,13 @@ export const SiteDetail: React.FC = () => {
                 <div className="col-span-2">
                   <p className="text-gray-600">{contract.contract_type}</p>
                 </div>
-                <div className="col-span-4">
+                <div className="col-span-3">
                   <p className="text-gray-600">{formatDate(contract.start_date)} to {formatDate(contract.end_date)}</p>
                 </div>
-                <div className="col-span-3">
+                <div className="col-span-2">
+                  <p className="text-gray-600 font-medium">{contract.contract_value ? formatCurrency(contract.contract_value) : '-'}</p>
+                </div>
+                <div className="col-span-2">
                   <p className="text-gray-600">{contract.contact_person_name || '-'}</p>
                 </div>
                 <div className="col-span-1 text-right">
