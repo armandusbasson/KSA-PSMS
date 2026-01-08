@@ -385,28 +385,23 @@ export const MeetingForm: React.FC = () => {
         </div>
 
         <div>
-          <h3 className="text-sm font-medium text-gray-700 mb-2">Meeting Items</h3>
-          <div className="grid grid-cols-12 gap-2 items-center text-sm text-gray-600 mb-2">
-            <div className="col-span-4 font-medium">Issue</div>
-            <div className="col-span-4 font-medium">Staff Responsible</div>
-            <div className="col-span-2 font-medium">Target Date</div>
-            <div className="col-span-2 font-medium">Invoice / Payment</div>
-          </div>
+          <h3 className="text-sm font-medium text-gray-700 mb-4">Meeting Items</h3>
           <div className="space-y-4">
             {items.map((item, idx) => (
-                <div key={idx} className="grid grid-cols-12 gap-2 items-start p-3 border rounded-lg bg-gray-50">
-                  <div className="col-span-12">
+                <div key={idx} className="p-4 border rounded-lg bg-gray-50">
+                  <div className="mb-4">
+                    <label className="block text-xs font-semibold text-gray-700 mb-1 uppercase">Issue Discussed</label>
                     <input
                       type="text"
-                      placeholder="Issue"
+                      placeholder="Describe the issue..."
                       value={item.issue_discussed}
                       onChange={(e) => updateItem(idx, 'issue_discussed', e.target.value)}
                       className="w-full px-3 py-2 border rounded"
                     />
                   </div>
 
-                  <div className="col-span-12">
-                    <label className="block text-xs font-medium text-gray-600 mb-1">Staff Responsible</label>
+                  <div className="mb-4">
+                    <label className="block text-xs font-semibold text-gray-700 mb-1 uppercase">Staff Responsible</label>
                     <div className="mb-2 flex gap-2">
                       <select 
                         onChange={(e) => {
@@ -447,38 +442,37 @@ export const MeetingForm: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="col-span-4">
-                    <input
-                      type="date"
-                      value={item.target_date ?? ''}
-                      onChange={(e) => updateItem(idx, 'target_date', e.target.value || undefined)}
-                      className="w-full px-3 py-2 border rounded text-sm"
-                    />
+                  <div className="grid grid-cols-3 gap-3 mb-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-700 mb-1 uppercase">Target Date</label>
+                      <input
+                        type="date"
+                        value={item.target_date ?? ''}
+                        onChange={(e) => updateItem(idx, 'target_date', e.target.value || undefined)}
+                        className="w-full px-3 py-2 border rounded text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-700 mb-1 uppercase">Invoice Date</label>
+                      <input
+                        type="date"
+                        value={item.invoice_date ?? ''}
+                        onChange={(e) => updateItem(idx, 'invoice_date', e.target.value || undefined)}
+                        className="w-full px-3 py-2 border rounded text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-700 mb-1 uppercase">Payment Date</label>
+                      <input
+                        type="date"
+                        value={item.payment_date ?? ''}
+                        onChange={(e) => updateItem(idx, 'payment_date', e.target.value || undefined)}
+                        className="w-full px-3 py-2 border rounded text-sm"
+                      />
+                    </div>
                   </div>
 
-                  <div className="col-span-4 flex flex-col gap-2">
-                    <input
-                      type="date"
-                      value={item.invoice_date ?? ''}
-                      onChange={(e) => updateItem(idx, 'invoice_date', e.target.value || undefined)}
-                      className="w-full px-3 py-2 border rounded text-sm"
-                      placeholder="Invoice Date"
-                    />
-                  </div>
-
-                  <div className="col-span-2">
-                    <input
-                      type="date"
-                      value={item.payment_date ?? ''}
-                      onChange={(e) => updateItem(idx, 'payment_date', e.target.value || undefined)}
-                      className="w-full px-3 py-2 border rounded text-sm"
-                      placeholder="Payment Date"
-                    />
-                  </div>
-
-                  <div className="col-span-2">
-                    <Button type="button" variant="destructive" className="w-full" onClick={() => removeItem(idx)}>Remove</Button>
-                  </div>
+                  <Button type="button" variant="destructive" className="w-full" onClick={() => removeItem(idx)}>Remove Item</Button>
                 </div>
               ))}
             </div>
