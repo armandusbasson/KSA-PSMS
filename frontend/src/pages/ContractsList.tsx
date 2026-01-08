@@ -10,7 +10,7 @@ import { Contract, ContractStatus } from '../types';
 export const ContractsList: React.FC = () => {
   const navigate = useNavigate();
   const { contracts, loading, error, fetchContracts, deleteContract } = useContracts();
-  const { sites } = useSites();
+  const { sites, fetchSites } = useSites();
   
   const [filteredContracts, setFilteredContracts] = useState<Contract[]>([]);
   const [statusFilter, setStatusFilter] = useState<ContractStatus | ''>('');
@@ -18,6 +18,7 @@ export const ContractsList: React.FC = () => {
 
   useEffect(() => {
     fetchContracts();
+    fetchSites();
   }, []);
 
   useEffect(() => {
