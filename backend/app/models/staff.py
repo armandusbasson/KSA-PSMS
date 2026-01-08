@@ -19,7 +19,7 @@ class Staff(Base):
     # Relationships
     site_links = relationship("SiteStaffLink", back_populates="staff", cascade="all, delete-orphan")
     meetings_chaired = relationship("Meeting", foreign_keys="Meeting.chairperson_staff_id", back_populates="chairperson")
-    meeting_items = relationship("MeetingItem", foreign_keys="MeetingItem.person_responsible_staff_id", back_populates="responsible_person")
+    meeting_items = relationship("MeetingItem", secondary="meeting_item_staff", back_populates="responsible_staff")
 
     def __repr__(self):
         return f"<Staff(id={self.id}, name={self.name}, role={self.role})>"

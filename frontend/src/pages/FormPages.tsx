@@ -214,7 +214,7 @@ export const MeetingForm: React.FC = () => {
     load();
   }, [id, isEdit]);
 
-  const addItem = () => setItems([...items, { issue_discussed: '', person_responsible_staff_id: undefined, target_date: undefined, invoice_date: undefined, payment_date: undefined }]);
+  const addItem = () => setItems([...items, { issue_discussed: '', responsible_staff_ids: [], target_date: undefined, invoice_date: undefined, payment_date: undefined }]);
   const removeItem = (index: number) => setItems(items.filter((_: any, i: number) => i !== index));
   const updateItem = (index: number, field: string, value: any) => {
     const updated = [...items];
@@ -371,54 +371,97 @@ export const MeetingForm: React.FC = () => {
         <div>
           <h3 className="text-sm font-medium text-gray-700 mb-2">Meeting Items</h3>
           <div className="grid grid-cols-12 gap-2 items-center text-sm text-gray-600 mb-2">
-            <div className="col-span-5 font-medium">Issue</div>
-            <div className="col-span-3 font-medium">Person Responsible</div>
+            <div className="col-span-4 font-medium">Issue</div>
+            <div className="col-span-4 font-medium">Staff Responsible</div>
             <div className="col-span-2 font-medium">Target Date</div>
             <div className="col-span-2 font-medium">Invoice / Payment</div>
           </div>
-          <div className="space-y-2">
+          <div className="space-y-4">
             {items.map((item, idx) => (
-                <div key={idx} className="grid grid-cols-12 gap-2 items-start">
-                  <input
-                    type="text"
-                    placeholder="Issue"
-                    value={item.issue_discussed}
-                    onChange={(e) => updateItem(idx, 'issue_discussed', e.target.value)}
-                    className="col-span-5 px-3 py-2 border rounded"
-                  />
+                <div key={idx} className="grid grid-cols-12 gap-2 items-start p-3 border rounded-lg bg-gray-50">
+                  <div className="col-span-12">
+                    <input
+                      type="text"
+                      placeholder="Issue"
+                      value={item.issue_discussed}
+                      onChange={(e) => updateItem(idx, 'issue_discussed', e.target.value)}
+                      className="w-full px-3 py-2 border rounded"
+                    />
+                  </div>
 
-                  <select
-                    value={item.person_responsible_staff_id ?? ''}
-                    onChange={(e) => updateItem(idx, 'person_responsible_staff_id', e.target.value ? parseInt(e.target.value, 10) : undefined)}
-                    className="col-span-3 px-3 py-2 border rounded"
-                  >
-                    <option value="">Person responsible...</option>
-                    {staff.map(s => (
-                      <option key={s.id} value={s.id}>{formatFullName(s.name, s.surname)}</option>
-                    ))}
-                  </select>
+                  <div className="col-span-12">
+                    <label className="block text-xs font-medium text-gray-600 mb-1">Staff Responsible</label>
+                    <div className="mb-2 flex gap-2">
+                      <select 
+                        onChange={(e) => {
+                          const staffId = e.target.value ? parseInt(e.target.value, 10) : undefined;
+                          if (staffId && !item.responsible_staff_ids?.includes(staffId)) {
+                            const newIds = [...(item.responsible_staff_ids || []), staffId];
+                            updateItem(idx, 'responsible_staff_ids', newIds);
+                            e.target.value = '';
+                          }
+                        }}
+                        className="flex-1 px-3 py-2 border rounded text-sm"
+                      >
+                        <option value="">Select staff member...</option>
+                        {staff.filter((s: any) => !item.responsible_staff_ids?.includes(s.id)).map(s => (
+                          <option key={s.id} value={s.id}>{formatFullName(s.name, s.surname)}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="flex gap-2 flex-wrap">
+                      {(item.responsible_staff_ids || []).map((staffId: number) => {
+                        const staffMember = staff.find((s: any) => s.id === staffId);
+                        return staffMember ? (
+                          <div key={staffId} className="px-2 py-1 bg-blue-100 rounded text-xs flex items-center gap-2">
+                            <span>{formatFullName(staffMember.name, staffMember.surname)}</span>
+                            <button 
+                              type="button" 
+                              onClick={() => {
+                                const newIds = (item.responsible_staff_ids || []).filter((id: number) => id !== staffId);
+                                updateItem(idx, 'responsible_staff_ids', newIds);
+                              }}
+                              className="text-red-600 font-bold"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        ) : null;
+                      })}
+                    </div>
+                  </div>
 
-                  <input
-                    type="date"
-                    value={item.target_date ?? ''}
-                    onChange={(e) => updateItem(idx, 'target_date', e.target.value || undefined)}
-                    className="col-span-2 px-3 py-2 border rounded"
-                  />
+                  <div className="col-span-4">
+                    <input
+                      type="date"
+                      value={item.target_date ?? ''}
+                      onChange={(e) => updateItem(idx, 'target_date', e.target.value || undefined)}
+                      className="w-full px-3 py-2 border rounded text-sm"
+                    />
+                  </div>
 
-                  <div className="col-span-2 flex flex-col gap-2">
+                  <div className="col-span-4 flex flex-col gap-2">
                     <input
                       type="date"
                       value={item.invoice_date ?? ''}
                       onChange={(e) => updateItem(idx, 'invoice_date', e.target.value || undefined)}
-                      className="px-3 py-2 border rounded"
+                      className="w-full px-3 py-2 border rounded text-sm"
+                      placeholder="Invoice Date"
                     />
+                  </div>
+
+                  <div className="col-span-2">
                     <input
                       type="date"
                       value={item.payment_date ?? ''}
                       onChange={(e) => updateItem(idx, 'payment_date', e.target.value || undefined)}
-                      className="px-3 py-2 border rounded"
+                      className="w-full px-3 py-2 border rounded text-sm"
+                      placeholder="Payment Date"
                     />
-                    <Button type="button" variant="destructive" className="mt-2" onClick={() => removeItem(idx)}>Remove</Button>
+                  </div>
+
+                  <div className="col-span-2">
+                    <Button type="button" variant="destructive" className="w-full" onClick={() => removeItem(idx)}>Remove</Button>
                   </div>
                 </div>
               ))}

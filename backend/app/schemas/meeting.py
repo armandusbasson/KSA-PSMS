@@ -2,10 +2,19 @@ from pydantic import BaseModel, Field
 from typing import Optional, List
 from datetime import datetime, date
 
+class StaffBasic(BaseModel):
+    """Basic staff info for meeting items"""
+    id: int
+    name: str
+    surname: str
+
+    class Config:
+        from_attributes = True
+
 class MeetingItemCreate(BaseModel):
     """Schema for creating a meeting item"""
     issue_discussed: str = Field(..., min_length=1)
-    person_responsible_staff_id: Optional[int] = None
+    responsible_staff_ids: List[int] = []
     target_date: Optional[date] = None
     invoice_date: Optional[date] = None
     payment_date: Optional[date] = None
@@ -13,7 +22,7 @@ class MeetingItemCreate(BaseModel):
 class MeetingItemUpdate(BaseModel):
     """Schema for updating a meeting item"""
     issue_discussed: Optional[str] = Field(None, min_length=1)
-    person_responsible_staff_id: Optional[int] = None
+    responsible_staff_ids: Optional[List[int]] = None
     target_date: Optional[date] = None
     invoice_date: Optional[date] = None
     payment_date: Optional[date] = None
@@ -23,7 +32,7 @@ class MeetingItemResponse(BaseModel):
     id: int
     meeting_id: int
     issue_discussed: str
-    person_responsible_staff_id: Optional[int] = None
+    responsible_staff: List[StaffBasic] = []
     target_date: Optional[date] = None
     invoice_date: Optional[date] = None
     payment_date: Optional[date] = None

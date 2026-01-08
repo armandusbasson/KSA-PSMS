@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 from app.models.meeting import Meeting, MeetingItem
 from app.models.site import Site
+from app.models.staff import Staff
 from app.schemas.meeting import MeetingCreate, MeetingUpdate, MeetingItemCreate
 from typing import List, Optional
 
@@ -29,8 +30,15 @@ def create_meeting(db: Session, meeting: MeetingCreate) -> Optional[Meeting]:
     for item in meeting.items:
         db_item = MeetingItem(
             meeting_id=db_meeting.id,
-            **item.model_dump()
+            issue_discussed=item.issue_discussed,
+            target_date=item.target_date,
+            invoice_date=item.invoice_date,
+            payment_date=item.payment_date,
         )
+        # Add responsible staff
+        if item.responsible_staff_ids:
+            responsible_staff = db.query(Staff).filter(Staff.id.in_(item.responsible_staff_ids)).all()
+            db_item.responsible_staff = responsible_staff
         db.add(db_item)
     
     db.commit()
@@ -76,8 +84,15 @@ def update_meeting(db: Session, meeting_id: int, meeting: MeetingUpdate) -> Opti
         for item in meeting.items:
             db_item = MeetingItem(
                 meeting_id=meeting_id,
-                **item.model_dump()
+                issue_discussed=item.issue_discussed,
+                target_date=item.target_date,
+                invoice_date=item.invoice_date,
+                payment_date=item.payment_date,
             )
+            # Add responsible staff
+            if item.responsible_staff_ids:
+                responsible_staff = db.query(Staff).filter(Staff.id.in_(item.responsible_staff_ids)).all()
+                db_item.responsible_staff = responsible_staff
             db.add(db_item)
     
     db.add(db_meeting)

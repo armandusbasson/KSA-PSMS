@@ -1,7 +1,15 @@
 from datetime import datetime, date
-from sqlalchemy import Column, Integer, String, Text, DateTime, Date, ForeignKey
+from sqlalchemy import Column, Integer, String, Text, DateTime, Date, ForeignKey, Table
 from sqlalchemy.orm import relationship
 from app.database import Base
+
+# Junction table for meeting item staff responsibilities
+meeting_item_staff = Table(
+    "meeting_item_staff",
+    Base.metadata,
+    Column("meeting_item_id", Integer, ForeignKey("meeting_items.id", ondelete="CASCADE"), primary_key=True),
+    Column("staff_id", Integer, ForeignKey("staff.id", ondelete="CASCADE"), primary_key=True),
+)
 
 class Meeting(Base):
     """Meeting model linked to a site"""
@@ -34,7 +42,6 @@ class MeetingItem(Base):
     id = Column(Integer, primary_key=True, index=True)
     meeting_id = Column(Integer, ForeignKey("meetings.id", ondelete="CASCADE"), nullable=False, index=True)
     issue_discussed = Column(Text, nullable=False)
-    person_responsible_staff_id = Column(Integer, ForeignKey("staff.id", ondelete="SET NULL"), nullable=True, index=True)
     target_date = Column(Date, nullable=True)
     invoice_date = Column(Date, nullable=True)
     payment_date = Column(Date, nullable=True)
@@ -43,7 +50,7 @@ class MeetingItem(Base):
 
     # Relationships
     meeting = relationship("Meeting", back_populates="items")
-    responsible_person = relationship("Staff", foreign_keys=[person_responsible_staff_id], back_populates="meeting_items")
+    responsible_staff = relationship("Staff", secondary=meeting_item_staff, back_populates="meeting_items")
 
     def __repr__(self):
         return f"<MeetingItem(id={self.id}, meeting_id={self.meeting_id})>"
