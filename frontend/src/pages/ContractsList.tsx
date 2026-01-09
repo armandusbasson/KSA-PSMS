@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useContracts } from '../hooks/useContracts';
 import { useSites } from '../hooks/useSites';
 import { Card, Button, LoadingSpinner, ErrorMessage } from '../components/Common';
-import { Plus, Edit, Trash2, Download, FileText } from 'lucide-react';
+import { Plus, Edit, Trash2, Download, FileText, DollarSign, Briefcase } from 'lucide-react';
 import { formatDate, formatCurrency } from '../utils/formatters';
 import { Contract, ContractStatus } from '../types';
 
@@ -71,6 +71,14 @@ export const ContractsList: React.FC = () => {
     return sites.find(s => s.id === siteId)?.name || `Site #${siteId}`;
   };
 
+  const serviceContractTotal = contracts
+    .filter(c => c.contract_type === 'Service')
+    .reduce((sum, c) => sum + (c.contract_value || 0), 0);
+
+  const supplyContractTotal = contracts
+    .filter(c => c.contract_type === 'Supply')
+    .reduce((sum, c) => sum + (c.contract_value || 0), 0);
+
   if (loading) return <LoadingSpinner />;
   if (error) return <ErrorMessage message={error} />;
 
@@ -82,6 +90,29 @@ export const ContractsList: React.FC = () => {
           <Plus size={16} className="inline mr-2" />
           New Contract
         </Button>
+      </div>
+
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <Card>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-gray-600 text-sm font-medium">Total Service Contracts</p>
+              <p className="text-2xl font-bold text-gray-900 mt-1">{formatCurrency(serviceContractTotal)}</p>
+            </div>
+            <Briefcase className="text-blue-600" size={32} />
+          </div>
+        </Card>
+
+        <Card>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-gray-600 text-sm font-medium">Total Supply Contracts</p>
+              <p className="text-2xl font-bold text-gray-900 mt-1">{formatCurrency(supplyContractTotal)}</p>
+            </div>
+            <DollarSign className="text-green-600" size={32} />
+          </div>
+        </Card>
       </div>
 
       <Card className="mb-6">
