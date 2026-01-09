@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Plus, Edit2, Trash2 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useSites } from '../hooks/useSites';
 import { Card, Button, LoadingSpinner, ErrorMessage } from '../components/Common';
 import { truncate } from '../utils/formatters';
@@ -8,6 +8,7 @@ import { meetingService } from '../api/meetingService';
 import { contractService } from '../api/contractService';
 
 export const SiteList: React.FC = () => {
+  const navigate = useNavigate();
   const { sites, loading, error, fetchSites, deleteSite } = useSites();
   const [searchTerm, setSearchTerm] = useState('');
   const [siteCounts, setSiteCounts] = useState<{ [key: number]: { meetings: number; contracts: number } }>({});
@@ -98,17 +99,17 @@ export const SiteList: React.FC = () => {
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {filteredSites.map((site) => (
-                  <tr key={site.id} className="hover:bg-gray-50">
+                  <tr key={site.id} className="hover:bg-gray-50 cursor-pointer transition-colors" onClick={() => navigate(`/sites/${site.id}`)}>
                     <td className="px-6 py-4">
-                      <Link to={`/sites/${site.id}`} className="text-blue-600 hover:underline font-medium">
+                      <span className="text-blue-600 font-medium">
                         {site.name}
-                      </Link>
+                      </span>
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-600">{truncate(site.contact_person || '', 40)}</td>
                     <td className="px-6 py-4 text-sm text-gray-600">{truncate(site.contact_number || '', 40)}</td>
                     <td className="px-6 py-4 text-sm text-gray-600 font-medium">{siteCounts[site.id]?.meetings || 0}</td>
                     <td className="px-6 py-4 text-sm text-gray-600 font-medium">{siteCounts[site.id]?.contracts || 0}</td>
-                    <td className="px-6 py-4 text-sm space-x-2">
+                    <td className="px-6 py-4 text-sm space-x-2" onClick={(e) => e.stopPropagation()}>
                       <Link to={`/sites/${site.id}/edit`} className="inline">
                         <Button variant="secondary" className="px-3 py-1">
                           <Edit2 size={16} />
