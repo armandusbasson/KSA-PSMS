@@ -57,7 +57,7 @@ export const Dashboard: React.FC = () => {
         <>
           {/* Summary Cards */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <Card>
+            <Card className="cursor-pointer hover:shadow-lg transition-shadow duration-200" onClick={() => navigate('/sites')}>
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-gray-600 text-sm font-medium">Total Sites</p>
@@ -67,7 +67,7 @@ export const Dashboard: React.FC = () => {
               </div>
             </Card>
 
-            <Card>
+            <Card className="cursor-pointer hover:shadow-lg transition-shadow duration-200" onClick={() => navigate('/staff')}>
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-gray-600 text-sm font-medium">Total Staff</p>
@@ -77,7 +77,7 @@ export const Dashboard: React.FC = () => {
               </div>
             </Card>
 
-            <Card>
+            <Card className="cursor-pointer hover:shadow-lg transition-shadow duration-200" onClick={() => navigate('/meetings')}>
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-gray-600 text-sm font-medium">Total Meetings</p>
@@ -87,7 +87,7 @@ export const Dashboard: React.FC = () => {
               </div>
             </Card>
 
-            <Card>
+            <Card className="cursor-pointer hover:shadow-lg transition-shadow duration-200" onClick={() => navigate('/contracts')}>
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-gray-600 text-sm font-medium">Total Contracts</p>

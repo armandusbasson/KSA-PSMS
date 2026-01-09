@@ -33,8 +33,8 @@ export const Button: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement> & { 
   );
 };
 
-export const Card: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className }) => (
-  <div className={`bg-white rounded-lg shadow p-6 ${className || ''}`}>
+export const Card: React.FC<React.HTMLAttributes<HTMLDivElement> & { children: React.ReactNode; className?: string }> = ({ children, className, ...props }) => (
+  <div className={`bg-white rounded-lg shadow p-6 ${className || ''}`} {...props}>
     {children}
   </div>
 );
