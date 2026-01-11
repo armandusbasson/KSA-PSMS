@@ -508,8 +508,6 @@ export const ContractForm: React.FC = () => {
     contact_person_name: '',
     contact_person_telephone: '',
     contact_person_email: '',
-    internal_quotation_number: '',
-    internal_invoice_number: '',
     contract_value: undefined,
     notes: '',
   });
@@ -542,8 +540,6 @@ export const ContractForm: React.FC = () => {
           contact_person_name: data.contact_person_name || '',
           contact_person_telephone: data.contact_person_telephone || '',
           contact_person_email: data.contact_person_email || '',
-          internal_quotation_number: data.internal_quotation_number || '',
-          internal_invoice_number: data.internal_invoice_number || '',
           contract_value: data.contract_value || undefined,
           notes: data.notes || '',
         });
@@ -611,19 +607,29 @@ export const ContractForm: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Status *</label>
-            <select
-              required
-              value={formData.status}
-              onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
+            <label className="block text-sm font-medium text-gray-700 mb-1">Eskom Contract Reference</label>
+            <input
+              type="text"
+              value={formData.eskom_reference}
+              onChange={(e) => setFormData({ ...formData, eskom_reference: e.target.value })}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
-            >
-              <option value="Active">Active</option>
-              <option value="Expired">Expired</option>
-              <option value="Completed">Completed</option>
-              <option value="Cancelled">Cancelled</option>
-            </select>
+            />
           </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Status *</label>
+          <select
+            required
+            value={formData.status}
+            onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+          >
+            <option value="Active">Active</option>
+            <option value="Expired">Expired</option>
+            <option value="Completed">Completed</option>
+            <option value="Cancelled">Cancelled</option>
+          </select>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
@@ -692,41 +698,6 @@ export const ContractForm: React.FC = () => {
               placeholder="Enter contract value in South African Rand..."
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
             />
-          </div>
-        </div>
-
-        <div className="border-t pt-4">
-          <h3 className="text-lg font-semibold text-gray-800 mb-3">Reference Numbers</h3>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Eskom Contract Reference</label>
-              <input
-                type="text"
-                value={formData.eskom_reference}
-                onChange={(e) => setFormData({ ...formData, eskom_reference: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Internal Quotation Number</label>
-              <input
-                type="text"
-                value={formData.internal_quotation_number}
-                onChange={(e) => setFormData({ ...formData, internal_quotation_number: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Internal Invoice Number</label>
-              <input
-                type="text"
-                value={formData.internal_invoice_number}
-                onChange={(e) => setFormData({ ...formData, internal_invoice_number: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
-              />
-            </div>
           </div>
         </div>
 

@@ -166,8 +166,6 @@ export interface CreateContractInput {
   contact_person_name?: string;
   contact_person_telephone?: string;
   contact_person_email?: string;
-  internal_quotation_number?: string;
-  internal_invoice_number?: string;
   contract_value?: number;
   notes?: string;
 }
@@ -183,8 +181,6 @@ export interface UpdateContractInput {
   contact_person_name?: string;
   contact_person_telephone?: string;
   contact_person_email?: string;
-  internal_quotation_number?: string;
-  internal_invoice_number?: string;
   contract_value?: number;
   notes?: string;
 }
