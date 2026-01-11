@@ -1,11 +1,17 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database import get_db
-from app.schemas.site import SiteCreate, SiteUpdate, SiteResponse, SiteDetailResponse
+from app.schemas.site import SiteCreate, SiteUpdate, SiteResponse, SiteDetailResponse, StaffRole
 from app.crud import site as crud_site
 from app.crud import site_staff
 from app.schemas.staff import StaffResponse
 from typing import List
+from pydantic import BaseModel
+
+class AddStaffRequest(BaseModel):
+    """Request body for adding staff to a site"""
+    staff_id: int
+    role: str = "Site Manager"  # Use string for role
 
 router = APIRouter(prefix="/api/sites", tags=["sites"])
 
@@ -27,13 +33,47 @@ def list_sites(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
 @router.get("/{site_id}", response_model=SiteDetailResponse)
 def get_site(site_id: int, db: Session = Depends(get_db)):
     """Get a specific site with details"""
+    from app.schemas.site import SiteStaffResponse
+    
     db_site = crud_site.get_site(db, site_id)
     if not db_site:
         raise HTTPException(status_code=404, detail="Site not found")
     
-    # Manually compute counts to include in response
+    # Organize staff by role
+    site_managers = []
+    supervisors = []
+    valve_technicians = []
+    casual_staff = []
+    
+    for link in db_site.staff_links:
+        staff_response = SiteStaffResponse(
+            staff_id=link.staff.id,
+            staff_name=link.staff.name,
+            staff_surname=link.staff.surname,
+            staff_role=link.staff.role if hasattr(link.staff, 'role') else None,
+            site_role=link.role
+        )
+        
+        if link.role == "Site Manager":
+            site_managers.append(staff_response)
+        elif link.role == "Supervisor":
+            supervisors.append(staff_response)
+        elif link.role == "Valve Technician":
+            valve_technicians.append(staff_response)
+        elif link.role == "Casual Staff":
+            casual_staff.append(staff_response)
+    
+    # Manually construct response with organized staff
     result = SiteDetailResponse(
-        **{**db_site.__dict__, "staff_count": len(db_site.staff_links), "meeting_count": len(db_site.meetings)}
+        **{
+            **{k: v for k, v in db_site.__dict__.items() if not k.startswith('_')},
+            "staff_count": len(db_site.staff_links),
+            "meeting_count": len(db_site.meetings),
+            "site_managers": site_managers,
+            "supervisors": supervisors,
+            "valve_technicians": valve_technicians,
+            "casual_staff": casual_staff
+        }
     )
     return result
 
@@ -66,17 +106,17 @@ def get_site_staff(site_id: int, db: Session = Depends(get_db)):
     return site_staff.get_site_staff(db, site_id)
 
 @router.post("/{site_id}/staff/{staff_id}")
-def add_staff_to_site(site_id: int, staff_id: int, db: Session = Depends(get_db)):
-    """Add a staff member to a site"""
-    link = site_staff.add_staff_to_site(db, site_id, staff_id)
+def add_staff_to_site(site_id: int, staff_id: int, request: AddStaffRequest, db: Session = Depends(get_db)):
+    """Add a staff member to a site with a specific role"""
+    link = site_staff.add_staff_to_site(db, site_id, staff_id, request.role)
     if not link:
         raise HTTPException(status_code=404, detail="Site or staff not found")
-    return {"message": "Staff added to site successfully"}
+    return {"message": "Staff added to site successfully", "role": request.role}
 
 @router.delete("/{site_id}/staff/{staff_id}")
-def remove_staff_from_site(site_id: int, staff_id: int, db: Session = Depends(get_db)):
-    """Remove a staff member from a site"""
-    success = site_staff.remove_staff_from_site(db, site_id, staff_id)
+def remove_staff_from_site(site_id: int, staff_id: int, role: str = "Site Manager", db: Session = Depends(get_db)):
+    """Remove a staff member from a site in a specific role"""
+    success = site_staff.remove_staff_from_site(db, site_id, staff_id, role)
     if not success:
         raise HTTPException(status_code=404, detail="Link not found")
     return {"message": "Staff removed from site successfully"}

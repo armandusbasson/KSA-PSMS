@@ -66,6 +66,15 @@ def init_db():
                 pass
             if 'internal_invoice_number' in cols4:
                 pass
+            # Add role column to site_staff_links table for role-based staff assignments
+            res5 = conn.execute(text("PRAGMA table_info('site_staff_links')")).fetchall()
+            cols5 = [r[1] for r in res5]
+            if 'role' not in cols5:
+                conn.execute(text("ALTER TABLE site_staff_links ADD COLUMN role VARCHAR(50)"))
+                # Update existing rows to have a role value (use the enum value)
+                conn.execute(text("UPDATE site_staff_links SET role = 'Site Manager' WHERE role IS NULL"))
+
+
         else:
             # Generic alter try - may succeed on Postgres/MySQL if column doesn't exist
             try:

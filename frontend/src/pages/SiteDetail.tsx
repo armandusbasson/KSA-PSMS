@@ -1,13 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useStaff } from '../hooks/useStaff';
-import { useSiteStaff } from '../hooks/useSiteStaff';
 import { useMeetings } from '../hooks/useMeetings';
 import { Card, Button, LoadingSpinner, ErrorMessage } from '../components/Common';
 import { ArrowLeft, Plus, Eye, Edit, Trash2 } from 'lucide-react';
-import { siteService } from '../api/siteService';
+import { siteService, StaffRole } from '../api/siteService';
 import { formatDate, formatFullName, formatCurrency } from '../utils/formatters';
 import { Contract } from '../types';
+
+interface SiteStaffMember {
+  staff_id: number;
+  staff_name: string;
+  staff_surname?: string;
+  staff_role?: string;
+  site_role: StaffRole;
+}
 
 export const SiteDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -16,10 +23,19 @@ export const SiteDetail: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { staff: allStaff, fetchStaff } = useStaff();
-  const { staff: siteStaff, fetchSiteStaff, addStaff, removeStaff } = useSiteStaff();
   const { meetings, fetchMeetings } = useMeetings();
   const [contracts, setContracts] = useState<Contract[]>([]);
-  const [selectedStaffId, setSelectedStaffId] = useState('');
+  
+  // State for each role
+  const [siteManagers, setSiteManagers] = useState<SiteStaffMember[]>([]);
+  const [supervisors, setSupervisors] = useState<SiteStaffMember[]>([]);
+  const [valveTechnicians, setValveTechnicians] = useState<SiteStaffMember[]>([]);
+  const [casualStaff, setCasualStaff] = useState<SiteStaffMember[]>([]);
+  
+  // State for adding staff by role
+  const [selectedStaffIdByRole, setSelectedStaffIdByRole] = useState<{
+    [key in StaffRole]?: string;
+  }>({});
 
   useEffect(() => {
     const loadData = async () => {
@@ -27,9 +43,16 @@ export const SiteDetail: React.FC = () => {
       try {
         const siteData = await siteService.get(parseInt(id));
         setSite(siteData);
-        await fetchSiteStaff(parseInt(id));
+        
+        // Organize staff by role
+        setSiteManagers(siteData.site_managers || []);
+        setSupervisors(siteData.supervisors || []);
+        setValveTechnicians(siteData.valve_technicians || []);
+        setCasualStaff(siteData.casual_staff || []);
+        
         await fetchMeetings(parseInt(id));
         await fetchStaff();
+        
         // Fetch contracts for this site
         const siteContracts = await contractService.getAll(0, 100, parseInt(id));
         setContracts(siteContracts);
@@ -42,25 +65,89 @@ export const SiteDetail: React.FC = () => {
     loadData();
   }, [id]);
 
-  const handleAddStaff = async () => {
-    if (!selectedStaffId || !id) return;
+  const handleAddStaff = async (role: StaffRole) => {
+    const staffId = selectedStaffIdByRole[role];
+    if (!staffId || !id) return;
     try {
-      await addStaff(parseInt(id), parseInt(selectedStaffId));
-      setSelectedStaffId('');
+      await siteService.addStaff(parseInt(id), parseInt(staffId), role);
+      setSelectedStaffIdByRole(prev => ({ ...prev, [role]: '' }));
+      // Reload site data to get updated staff lists
+      const siteData = await siteService.get(parseInt(id));
+      setSiteManagers(siteData.site_managers || []);
+      setSupervisors(siteData.supervisors || []);
+      setValveTechnicians(siteData.valve_technicians || []);
+      setCasualStaff(siteData.casual_staff || []);
     } catch (err) {
-      // Error is handled
+      // Error is handled by component
     }
   };
 
-  const handleRemoveStaff = async (staffId: number) => {
+  const handleRemoveStaff = async (staffId: number, role: StaffRole) => {
     if (!id) return;
     if (window.confirm('Are you sure you want to remove this staff member from the site?')) {
       try {
-        await removeStaff(parseInt(id), staffId);
+        await siteService.removeStaff(parseInt(id), staffId, role);
+        // Reload site data to get updated staff lists
+        const siteData = await siteService.get(parseInt(id));
+        setSiteManagers(siteData.site_managers || []);
+        setSupervisors(siteData.supervisors || []);
+        setValveTechnicians(siteData.valve_technicians || []);
+        setCasualStaff(siteData.casual_staff || []);
       } catch (err) {
         // Error is handled
       }
     }
+  };
+
+  const renderStaffSection = (
+    title: string,
+    staffList: SiteStaffMember[],
+    role: StaffRole
+  ) => {
+    return (
+      <Card className="mb-6">
+        <h2 className="text-xl font-semibold mb-4">{title}</h2>
+        
+        <div className="mb-4 flex gap-2">
+          <select
+            value={selectedStaffIdByRole[role] || ''}
+            onChange={(e) => setSelectedStaffIdByRole(prev => ({ ...prev, [role]: e.target.value }))}
+            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+          >
+            <option value="">Select staff member to add...</option>
+            {allStaff.map(s => (
+              <option key={s.id} value={s.id}>{formatFullName(s.name, s.surname)}</option>
+            ))}
+          </select>
+          <Button onClick={() => handleAddStaff(role)} className="px-6">
+            <Plus size={16} className="inline mr-2" />
+            Add
+          </Button>
+        </div>
+
+        {staffList.length === 0 ? (
+          <p className="text-gray-500">No {title.toLowerCase()} assigned to this site</p>
+        ) : (
+          <div className="space-y-2">
+            {staffList.map(staff => (
+              <div key={`${staff.staff_id}-${role}`} className="flex justify-between items-center p-3 bg-gray-50 rounded">
+                <div>
+                  <p className="font-medium text-gray-900">{formatFullName(staff.staff_name, staff.staff_surname)}</p>
+                  <p className="text-sm text-gray-600">{staff.staff_role || 'No role'}</p>
+                </div>
+                <button
+                  onClick={() => handleRemoveStaff(staff.staff_id, role)}
+                  className="p-2 text-red-600 hover:bg-red-50 rounded transition-colors"
+                  title="Remove staff member"
+                >
+                  <Trash2 size={18} />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </Card>
+    );
   };
 
   const siteMeetings = meetings.filter(m => m.site_id === parseInt(id || '0'));
@@ -109,49 +196,17 @@ export const SiteDetail: React.FC = () => {
         </div>
       </Card>
 
-      {/* Assigned Staff */}
-      <Card className="mb-6">
-        <h2 className="text-xl font-semibold mb-4">Assigned Staff</h2>
-        
-        <div className="mb-4 flex gap-2">
-          <select
-            value={selectedStaffId}
-            onChange={(e) => setSelectedStaffId(e.target.value)}
-            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
-          >
-            <option value="">Select staff member to add...</option>
-            {allStaff.map(s => (
-              <option key={s.id} value={s.id}>{formatFullName(s.name, s.surname)}</option>
-            ))}
-          </select>
-          <Button onClick={handleAddStaff} className="px-6">
-            <Plus size={16} className="inline mr-2" />
-            Add
-          </Button>
-        </div>
-
-        {siteStaff.length === 0 ? (
-          <p className="text-gray-500">No staff assigned to this site</p>
-        ) : (
-          <div className="space-y-2">
-            {siteStaff.map(staff => (
-              <div key={staff.id} className="flex justify-between items-center p-3 bg-gray-50 rounded">
-                <div>
-                  <p className="font-medium text-gray-900">{formatFullName(staff.name, staff.surname)}</p>
-                  <p className="text-sm text-gray-600">{staff.role || 'No role'}</p>
-                </div>
-                <button
-                  onClick={() => handleRemoveStaff(staff.id)}
-                  className="p-2 text-red-600 hover:bg-red-50 rounded transition-colors"
-                  title="Remove staff member"
-                >
-                  <Trash2 size={18} />
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-      </Card>
+      {/* Site Manager Staff */}
+      {renderStaffSection('Site Manager', siteManagers, 'Site Manager')}
+      
+      {/* Supervisors */}
+      {renderStaffSection('Supervisors', supervisors, 'Supervisor')}
+      
+      {/* Valve Technicians */}
+      {renderStaffSection('Valve Technicians', valveTechnicians, 'Valve Technician')}
+      
+      {/* Casual Staff */}
+      {renderStaffSection('Casual Staff', casualStaff, 'Casual Staff')}
 
       {/* Linked Meetings */}
       <Card className="mb-6">

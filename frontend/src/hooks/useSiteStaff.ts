@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { Staff } from '../types';
-import { siteService } from '../api/siteService';
+import { siteService, StaffRole } from '../api/siteService';
 
 export const useSiteStaff = () => {
   const [staff, setStaff] = useState<Staff[]>([]);
@@ -20,11 +20,11 @@ export const useSiteStaff = () => {
     }
   }, []);
 
-  const addStaff = useCallback(async (siteId: number, staffId: number) => {
+  const addStaff = useCallback(async (siteId: number, staffId: number, role: StaffRole = 'Site Manager') => {
     setLoading(true);
     setError(null);
     try {
-      await siteService.addStaff(siteId, staffId);
+      await siteService.addStaff(siteId, staffId, role);
       // Refetch the staff list
       await fetchSiteStaff(siteId);
     } catch (err: any) {
@@ -35,11 +35,11 @@ export const useSiteStaff = () => {
     }
   }, [fetchSiteStaff]);
 
-  const removeStaff = useCallback(async (siteId: number, staffId: number) => {
+  const removeStaff = useCallback(async (siteId: number, staffId: number, role: StaffRole = 'Site Manager') => {
     setLoading(true);
     setError(null);
     try {
-      await siteService.removeStaff(siteId, staffId);
+      await siteService.removeStaff(siteId, staffId, role);
       // Refetch the staff list
       await fetchSiteStaff(siteId);
     } catch (err: any) {
@@ -58,4 +58,4 @@ export const useSiteStaff = () => {
     addStaff,
     removeStaff,
   };
-};
+};;

@@ -2,6 +2,8 @@ import client from './client';
 import { CreateSiteInput, UpdateSiteInput } from '../types';
 import { API_ENDPOINTS } from '../utils/constants';
 
+export type StaffRole = 'Site Manager' | 'Supervisor' | 'Valve Technician' | 'Casual Staff';
+
 // Sites CRUD
 export const siteService = {
   list: async (skip = 0, limit = 100) => {
@@ -37,13 +39,18 @@ export const siteService = {
     return response.data;
   },
 
-  addStaff: async (siteId: number, staffId: number) => {
-    const response = await client.post(API_ENDPOINTS.SITES_ADD_STAFF(siteId, staffId));
+  addStaff: async (siteId: number, staffId: number, role: StaffRole = 'Site Manager') => {
+    const response = await client.post(API_ENDPOINTS.SITES_ADD_STAFF(siteId, staffId), {
+      staff_id: staffId,
+      role: role
+    });
     return response.data;
   },
 
-  removeStaff: async (siteId: number, staffId: number) => {
-    const response = await client.delete(API_ENDPOINTS.SITES_REMOVE_STAFF(siteId, staffId));
+  removeStaff: async (siteId: number, staffId: number, role: StaffRole = 'Site Manager') => {
+    const response = await client.delete(API_ENDPOINTS.SITES_REMOVE_STAFF(siteId, staffId), {
+      params: { role }
+    });
     return response.data;
   },
 };
