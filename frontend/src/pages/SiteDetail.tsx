@@ -105,7 +105,7 @@ export const SiteDetail: React.FC = () => {
     role: StaffRole
   ) => {
     return (
-      <Card className="mb-6">
+      <Card>
         <h2 className="text-xl font-semibold mb-4">{title}</h2>
         
         <div className="mb-4 flex gap-2">
@@ -196,17 +196,13 @@ export const SiteDetail: React.FC = () => {
         </div>
       </Card>
 
-      {/* Site Manager Staff */}
-      {renderStaffSection('Site Manager', siteManagers, 'Site Manager')}
-      
-      {/* Supervisors */}
-      {renderStaffSection('Supervisors', supervisors, 'Supervisor')}
-      
-      {/* Valve Technicians */}
-      {renderStaffSection('Valve Technicians', valveTechnicians, 'Valve Technician')}
-      
-      {/* Casual Staff */}
-      {renderStaffSection('Casual Staff', casualStaff, 'Casual Staff')}
+      {/* Staff Roles - 4 Column Grid Layout */}
+      <div className="grid grid-cols-4 gap-4 mb-6">
+        {renderStaffSection('Site Manager', siteManagers, 'Site Manager')}
+        {renderStaffSection('Supervisors', supervisors, 'Supervisor')}
+        {renderStaffSection('Valve Technicians', valveTechnicians, 'Valve Technician')}
+        {renderStaffSection('Casual Staff', casualStaff, 'Casual Staff')}
+      </div>
 
       {/* Linked Meetings */}
       <Card className="mb-6">
