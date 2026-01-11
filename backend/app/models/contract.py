@@ -35,8 +35,6 @@ class Contract(Base):
     
     # Reference numbers
     eskom_reference = Column(String(255), nullable=True)  # Eskom Contract Reference Number
-    internal_quotation_number = Column(String(255), nullable=True)
-    internal_invoice_number = Column(String(255), nullable=True)
     
     # Contact information
     contact_person_name = Column(String(255), nullable=True)

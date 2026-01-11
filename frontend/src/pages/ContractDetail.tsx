@@ -161,32 +161,6 @@ export const ContractDetail: React.FC = () => {
         </div>
       </Card>
 
-      {(contract.eskom_reference || contract.internal_quotation_number || contract.internal_invoice_number) && (
-        <Card className="mb-6">
-          <h2 className="text-xl font-semibold mb-4">Reference Numbers</h2>
-          <div className="grid grid-cols-3 gap-6">
-            {contract.eskom_reference && (
-              <div>
-                <p className="text-sm font-medium text-gray-600 mb-1">Eskom Contract Reference</p>
-                <p className="text-gray-900 break-words">{contract.eskom_reference}</p>
-              </div>
-            )}
-            {contract.internal_quotation_number && (
-              <div>
-                <p className="text-sm font-medium text-gray-600 mb-1">Internal Quotation Number</p>
-                <p className="text-gray-900 break-words">{contract.internal_quotation_number}</p>
-              </div>
-            )}
-            {contract.internal_invoice_number && (
-              <div>
-                <p className="text-sm font-medium text-gray-600 mb-1">Internal Invoice Number</p>
-                <p className="text-gray-900 break-words">{contract.internal_invoice_number}</p>
-              </div>
-            )}
-          </div>
-        </Card>
-      )}
-
       {(contract.contact_person_name || contract.contact_person_telephone || contract.contact_person_email) && (
         <Card className="mb-6">
           <h2 className="text-xl font-semibold mb-4">Contact Information</h2>

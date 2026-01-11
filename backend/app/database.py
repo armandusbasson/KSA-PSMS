@@ -59,6 +59,13 @@ def init_db():
                 conn.execute(text("ALTER TABLE contracts ADD COLUMN notes TEXT"))
             if 'contract_value' not in cols4:
                 conn.execute(text("ALTER TABLE contracts ADD COLUMN contract_value DECIMAL(15, 2)"))
+            # Remove internal reference columns if they exist (cleanup migration)
+            if 'internal_quotation_number' in cols4:
+                # SQLite doesn't support DROP COLUMN directly, so we skip it for SQLite
+                # but we note that the column exists and won't be used
+                pass
+            if 'internal_invoice_number' in cols4:
+                pass
         else:
             # Generic alter try - may succeed on Postgres/MySQL if column doesn't exist
             try:
@@ -83,6 +90,15 @@ def init_db():
                 pass
             try:
                 conn.execute(text("ALTER TABLE contracts ADD COLUMN contract_value DECIMAL(15, 2)"))
+            except Exception:
+                pass
+            # Remove internal reference columns from PostgreSQL/MySQL
+            try:
+                conn.execute(text("ALTER TABLE contracts DROP COLUMN IF EXISTS internal_quotation_number"))
+            except Exception:
+                pass
+            try:
+                conn.execute(text("ALTER TABLE contracts DROP COLUMN IF EXISTS internal_invoice_number"))
             except Exception:
                 pass
     finally:
