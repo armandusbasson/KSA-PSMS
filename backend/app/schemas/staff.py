@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, EmailStr
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
 
 class StaffCreate(BaseModel):
@@ -35,3 +35,4 @@ class StaffResponse(BaseModel):
 class StaffDetailResponse(StaffResponse):
     """Extended staff response with relationships"""
     site_count: int = 0
+    assigned_sites: Optional[list] = Field(default_factory=list)

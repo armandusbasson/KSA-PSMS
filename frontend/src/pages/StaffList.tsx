@@ -207,6 +207,7 @@ export const StaffList: React.FC = () => {
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Role</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Email</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Phone</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Assigned Sites</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Created</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Actions</th>
                 </tr>
@@ -218,6 +219,7 @@ export const StaffList: React.FC = () => {
                     <td className="px-6 py-4 text-sm text-gray-600">{member.role || '-'}</td>
                     <td className="px-6 py-4 text-sm text-gray-600">{member.email || '-'}</td>
                     <td className="px-6 py-4 text-sm text-gray-600">{member.phone || '-'}</td>
+                    <td className="px-6 py-4 text-sm text-gray-600">{(member as any).assigned_sites?.length > 0 ? (member as any).assigned_sites.join(', ') : '-'}</td>
                     <td className="px-6 py-4 text-sm text-gray-600">{formatDate(member.created_at)}</td>
                     <td className="px-6 py-4 text-sm space-x-2">
                       <Button

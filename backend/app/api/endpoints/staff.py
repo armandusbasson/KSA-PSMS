@@ -12,10 +12,17 @@ def create_staff(staff: StaffCreate, db: Session = Depends(get_db)):
     """Create a new staff member"""
     return crud_staff.create_staff(db, staff)
 
-@router.get("", response_model=List[StaffResponse])
+@router.get("", response_model=List[StaffDetailResponse])
 def list_staff(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     """List all staff members"""
-    return crud_staff.list_staff(db, skip, limit)
+    staff_list = crud_staff.list_staff(db, skip, limit)
+    result = []
+    for member in staff_list:
+        site_names = [link.site.name for link in member.site_links]
+        result.append(StaffDetailResponse(
+            **{**member.__dict__, "site_count": len(member.site_links), "assigned_sites": site_names}
+        ))
+    return result
 
 @router.get("/{staff_id}", response_model=StaffDetailResponse)
 def get_staff(staff_id: int, db: Session = Depends(get_db)):
