@@ -511,6 +511,8 @@ export const ContractForm: React.FC = () => {
     contract_value: undefined,
     notes: '',
   });
+  
+  // Note: contract_type is set to 'Supply' by default and not exposed in the form
 
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(false);
@@ -592,29 +594,14 @@ export const ContractForm: React.FC = () => {
       {error && <ErrorMessage message={error} />}
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Contract Type *</label>
-            <select
-              required
-              value={formData.contract_type}
-              onChange={(e) => setFormData({ ...formData, contract_type: e.target.value as 'Supply' | 'Service' })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
-            >
-              <option value="Supply">Supply</option>
-              <option value="Service">Service</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Eskom Contract Reference</label>
-            <input
-              type="text"
-              value={formData.eskom_reference}
-              onChange={(e) => setFormData({ ...formData, eskom_reference: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
-            />
-          </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Eskom Contract Reference</label>
+          <input
+            type="text"
+            value={formData.eskom_reference}
+            onChange={(e) => setFormData({ ...formData, eskom_reference: e.target.value })}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+          />
         </div>
 
         <div>
