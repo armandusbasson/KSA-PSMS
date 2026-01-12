@@ -10,6 +10,9 @@ import { MeetingDetail } from './pages/MeetingDetail';
 import { ContractsList } from './pages/ContractsList';
 import { SupplyContractsList } from './pages/SupplyContractsList';
 import { ContractDetail } from './pages/ContractDetail';
+import { FleetList } from './pages/FleetList';
+import { FleetForm } from './pages/FleetForm';
+import { FleetDetail } from './pages/FleetDetail';
 import { NotFound } from './pages/NotFound';
 import './index.css';
 
@@ -36,6 +39,10 @@ function App() {
           <Route path="/supply-contracts/create" element={<SupplyContractForm />} />
           <Route path="/supply-contracts/:id/view" element={<ContractDetail />} />
           <Route path="/supply-contracts/:id/edit" element={<SupplyContractForm />} />
+          <Route path="/fleet" element={<FleetList />} />
+          <Route path="/fleet/create" element={<FleetForm />} />
+          <Route path="/fleet/:registrationPlate" element={<FleetDetail />} />
+          <Route path="/fleet/:registrationPlate/edit" element={<FleetForm />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Layout>

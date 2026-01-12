@@ -193,3 +193,64 @@ export interface ContractSummary {
   cancelled_count: number;
   overdue_count: number;
 }
+
+// Vehicle/Fleet Management Types
+export type VehicleType = 'Sedan' | 'SUV' | 'Truck' | 'Van';
+export type PrimaryUse = 'Delivery' | 'Sales' | 'Executive' | 'Pool Vehicle' | 'Service';
+
+export interface Vehicle {
+  vehicle_registration_plate: string;
+  make: string;
+  model: string;
+  year: number;
+  vin_chassis_number?: string;
+  vehicle_type: VehicleType;
+  colour?: string;
+  purchase_date?: string;
+  active_tracking: boolean;
+  assigned_staff_id?: number;
+  primary_use: PrimaryUse;
+  license_renewal_date?: string;
+  general_notes?: string;
+  natis_document?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface VehicleDetail extends Vehicle {
+  assigned_staff_name?: string;
+  assigned_staff_surname?: string;
+}
+
+export interface CreateVehicleInput {
+  vehicle_registration_plate: string;
+  make: string;
+  model: string;
+  year: number;
+  vin_chassis_number?: string;
+  vehicle_type: VehicleType;
+  colour?: string;
+  purchase_date?: string;
+  active_tracking: boolean;
+  assigned_staff_id?: number;
+  primary_use: PrimaryUse;
+  license_renewal_date?: string;
+  general_notes?: string;
+  natis_document?: string;
+}
+
+export interface UpdateVehicleInput {
+  make?: string;
+  model?: string;
+  year?: number;
+  vin_chassis_number?: string;
+  vehicle_type?: VehicleType;
+  colour?: string;
+  purchase_date?: string;
+  active_tracking?: boolean;
+  assigned_staff_id?: number;
+  primary_use?: PrimaryUse;
+  license_renewal_date?: string;
+  general_notes?: string;
+  natis_document?: string;
+}

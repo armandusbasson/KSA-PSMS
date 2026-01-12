@@ -4,7 +4,7 @@ from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 from app.config import settings
 from app.database import init_db
-from app.api.endpoints import sites, staff, meetings, contracts
+from app.api.endpoints import sites, staff, meetings, contracts, vehicles
 
 # Initialize database
 init_db()
@@ -35,6 +35,7 @@ app.include_router(sites.router)
 app.include_router(staff.router)
 app.include_router(meetings.router)
 app.include_router(contracts.router)
+app.include_router(vehicles.router)
 
 @app.get("/")
 def read_root():

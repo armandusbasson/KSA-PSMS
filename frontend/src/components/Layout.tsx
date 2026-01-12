@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { BarChart3, Users, Settings, CalendarDays, FileText } from 'lucide-react';
+import { BarChart3, Users, Settings, CalendarDays, FileText, Truck } from 'lucide-react';
 
 export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
@@ -12,6 +12,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
     { path: '/meetings', label: 'Meetings', icon: CalendarDays },
     { path: '/contracts', label: 'Service Contracts', icon: FileText },
     { path: '/supply-contracts', label: 'Supply Contracts', icon: FileText },
+    { path: '/fleet', label: 'Fleet Management', icon: Truck },
   ];
 
   return (

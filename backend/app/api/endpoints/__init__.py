@@ -1,3 +1,3 @@
-from . import sites, staff, meetings, contracts
+from . import sites, staff, meetings, contracts, vehicles
 
-__all__ = ["sites", "staff", "meetings", "contracts"]
+__all__ = ["sites", "staff", "meetings", "contracts", "vehicles"]
