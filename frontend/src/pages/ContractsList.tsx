@@ -121,7 +121,6 @@ export const ContractsList: React.FC = () => {
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Reference</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Type</th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Site</th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Start Date</th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">End Date</th>
@@ -141,7 +140,6 @@ export const ContractsList: React.FC = () => {
                   <td className="px-6 py-4 text-sm font-medium text-gray-900">
                     {contract.eskom_reference || contract.internal_quotation_number || `Contract #${contract.id}`}
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-600">{contract.contract_type}</td>
                   <td className="px-6 py-4 text-sm text-gray-600">{getSiteName(contract.site_id)}</td>
                   <td className="px-6 py-4 text-sm text-gray-600">{formatDate(contract.start_date)}</td>
                   <td className="px-6 py-4 text-sm text-gray-600">{formatDate(contract.end_date)}</td>
