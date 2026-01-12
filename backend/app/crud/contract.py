@@ -82,8 +82,8 @@ def create_contract(db: Session, contract: ContractCreate) -> Contract:
         contact_person_name=contract.contact_person_name,
         contact_person_telephone=contract.contact_person_telephone,
         contact_person_email=contract.contact_person_email,
-        internal_quotation_number=contract.internal_quotation_number,
-        internal_invoice_number=contract.internal_invoice_number,
+        contract_value=contract.contract_value,
+        notes=contract.notes,
     )
     db.add(db_contract)
     db.commit()
