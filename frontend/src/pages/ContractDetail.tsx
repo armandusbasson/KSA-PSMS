@@ -133,6 +133,10 @@ export const ContractDetail: React.FC = () => {
 
         <div className="grid grid-cols-2 gap-6">
           <div>
+            <p className="text-sm font-medium text-gray-600 mb-1">Contract Type</p>
+            <p className="text-gray-900 font-semibold">{contract.contract_type}</p>
+          </div>
+          <div>
             <p className="text-sm font-medium text-gray-600 mb-1">Associated Site</p>
             <p className="text-gray-900 font-semibold">{getSiteName(contract.site_id)}</p>
           </div>
