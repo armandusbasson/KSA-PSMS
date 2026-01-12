@@ -5,6 +5,7 @@ import { useStaff } from '../hooks/useStaff';
 import { Card, Button, ErrorMessage, LoadingSpinner } from '../components/Common';
 import { formatFullName } from '../utils/formatters';
 import { CreateVehicleInput, VehicleType, PrimaryUse } from '../types';
+import { Upload, Download, Trash2 } from 'lucide-react';
 
 export const FleetForm: React.FC = () => {
   const { registrationPlate } = useParams();
@@ -33,6 +34,9 @@ export const FleetForm: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [uploadedFile, setUploadedFile] = useState<{ name: string; path: string } | null>(null);
+  const [fileLoading, setFileLoading] = useState(false);
+  const [fileError, setFileError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchStaff();
@@ -62,6 +66,12 @@ export const FleetForm: React.FC = () => {
             general_notes: data.general_notes || '',
             natis_document: data.natis_document || '',
           });
+          if (data.natis_document) {
+            setUploadedFile({ 
+              name: data.natis_document.split('/').pop() || 'Document',
+              path: data.natis_document 
+            });
+          }
         }
       } catch (err: any) {
         setError(err.message || 'Failed to load vehicle');
@@ -71,6 +81,63 @@ export const FleetForm: React.FC = () => {
     };
     load();
   }, [registrationPlate, isEdit]);
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setFileLoading(true);
+    setFileError(null);
+
+    const formDataToSend = new FormData();
+    formDataToSend.append('file', file);
+
+    try {
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formDataToSend,
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to upload file');
+      }
+
+      const data = await response.json();
+      setUploadedFile({ name: file.name, path: data.file_path });
+      setFormData(prev => ({ ...prev, natis_document: data.file_path }));
+    } catch (err: any) {
+      setFileError(err.message || 'Failed to upload file');
+    } finally {
+      setFileLoading(false);
+      e.target.value = '';
+    }
+  };
+
+  const handleDeleteFile = async () => {
+    if (!uploadedFile || !window.confirm('Are you sure you want to delete this document?')) return;
+
+    setFileLoading(true);
+    setFileError(null);
+
+    try {
+      const response = await fetch('/api/delete-upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ file_path: uploadedFile.path }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete file');
+      }
+
+      setUploadedFile(null);
+      setFormData(prev => ({ ...prev, natis_document: '' }));
+    } catch (err: any) {
+      setFileError(err.message || 'Failed to delete file');
+    } finally {
+      setFileLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -307,16 +374,83 @@ export const FleetForm: React.FC = () => {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            NATIS Document Path/URL
-          </label>
-          <input
-            type="text"
-            value={formData.natis_document}
-            onChange={(e) => setFormData({ ...formData, natis_document: e.target.value })}
-            placeholder="Path or URL to NATIS document"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
-          />
+          <label className="block text-sm font-medium text-gray-700 mb-4">NATIS Document</label>
+          {fileError && <ErrorMessage message={fileError} />}
+          
+          {uploadedFile || formData.natis_document ? (
+            <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
+              <Download size={24} className="text-blue-600" />
+              <div className="flex-1">
+                <p className="font-medium text-gray-900">{uploadedFile?.name || formData.natis_document?.split('/').pop()}</p>
+                <p className="text-sm text-gray-600">Document uploaded</p>
+              </div>
+              <div className="flex gap-2">
+                {formData.natis_document?.startsWith('http') && (
+                  <a
+                    href={formData.natis_document}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  >
+                    <Download size={16} className="mr-2" />
+                    View
+                  </a>
+                )}
+                <Button
+                  type="button"
+                  onClick={() => document.getElementById('file-upload-replace')?.click()}
+                  disabled={fileLoading}
+                  variant="secondary"
+                >
+                  <Upload size={16} className="inline mr-2" />
+                  {fileLoading ? 'Uploading...' : 'Replace'}
+                </Button>
+                <Button
+                  type="button"
+                  onClick={handleDeleteFile}
+                  disabled={fileLoading}
+                  variant="secondary"
+                  className="text-red-600 hover:text-red-700"
+                >
+                  <Trash2 size={16} className="inline mr-2" />
+                  Delete
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-8 border-2 border-dashed border-gray-300 rounded-lg">
+              <p className="text-gray-600 mb-4">No document uploaded yet</p>
+              <input
+                id="file-upload-initial"
+                type="file"
+                onChange={handleFileUpload}
+                disabled={fileLoading}
+                className="hidden"
+                accept=".pdf,.docx,.doc,.xlsx,.xls,.txt,.png,.jpg,.jpeg"
+              />
+              <Button 
+                type="button" 
+                onClick={() => document.getElementById('file-upload-initial')?.click()}
+                disabled={fileLoading}
+              >
+                <Upload size={16} className="inline mr-2" />
+                {fileLoading ? 'Uploading...' : 'Upload Document'}
+              </Button>
+            </div>
+          )}
+
+          {formData.natis_document && (
+            <div className="mt-4">
+              <input
+                id="file-upload-replace"
+                type="file"
+                onChange={handleFileUpload}
+                disabled={fileLoading}
+                className="hidden"
+                accept=".pdf,.docx,.doc,.xlsx,.xls,.txt,.png,.jpg,.jpeg"
+              />
+            </div>
+          )}
         </div>
 
         <div className="flex gap-3 pt-4">

@@ -10,11 +10,15 @@ export const FleetDetail: React.FC = () => {
   const { registrationPlate } = useParams();
   const navigate = useNavigate();
   const { fetchVehicle, deleteVehicle } = useVehicles();
-  const { staff } = useStaff();
+  const { staff, fetchStaff } = useStaff();
 
   const [vehicle, setVehicle] = useState<VehicleDetail | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchStaff();
+  }, []);
 
   useEffect(() => {
     if (!registrationPlate) return;
@@ -109,10 +113,16 @@ export const FleetDetail: React.FC = () => {
               <div>
                 <p className="text-sm text-gray-600">Assigned Staff Member</p>
                 <p className="text-lg font-medium text-gray-800">
-                  {vehicle.assigned_staff_id ? formatFullName(
-                    staff.find(s => s.id === vehicle.assigned_staff_id)?.name || '',
-                    staff.find(s => s.id === vehicle.assigned_staff_id)?.surname || ''
-                  ) : 'Unassigned'}
+                  {vehicle.assigned_staff_id ? (
+                    (() => {
+                      const staffMember = staff.find(s => s.id === vehicle.assigned_staff_id);
+                      return staffMember 
+                        ? formatFullName(staffMember.name, staffMember.surname)
+                        : 'Staff Member Not Found';
+                    })()
+                  ) : (
+                    'Unassigned'
+                  )}
                 </p>
               </div>
               <div>
