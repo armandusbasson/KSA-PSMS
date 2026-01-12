@@ -498,7 +498,7 @@ export const ContractForm: React.FC = () => {
   const { staff, fetchStaff } = useStaff();
 
   const [formData, setFormData] = useState<CreateContractInput>({
-    contract_type: 'Supply',
+    contract_type: 'Service',
     start_date: new Date().toISOString().split('T')[0],
     end_date: new Date(new Date().getTime() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     status: 'Active',
@@ -512,7 +512,7 @@ export const ContractForm: React.FC = () => {
     notes: '',
   });
   
-  // Note: contract_type is set to 'Supply' by default and not exposed in the form
+  // Note: contract_type is set to 'Service' by default and not exposed in the form
 
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(false);
@@ -590,7 +590,7 @@ export const ContractForm: React.FC = () => {
 
   return (
     <Card>
-      <h1 className="text-2xl font-bold mb-4 text-gray-800">{isEdit ? 'Edit Contract' : 'New Contract'}</h1>
+      <h1 className="text-2xl font-bold mb-4 text-gray-800">{isEdit ? 'Edit Service Contract' : 'New Service Contract'}</h1>
       {error && <ErrorMessage message={error} />}
 
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -738,7 +738,7 @@ export const ContractForm: React.FC = () => {
         </div>
 
         <div className="flex gap-3">
-          <Button type="submit" disabled={loading}>{loading ? 'Saving...' : (isEdit ? 'Update Contract' : 'Create Contract')}</Button>
+          <Button type="submit" disabled={loading}>{loading ? 'Saving...' : (isEdit ? 'Update Service Contract' : 'Create Service Contract')}</Button>
           <Button type="button" variant="secondary" onClick={() => navigate(isEdit && id ? `/contracts/${id}/view` : '/contracts')}>Cancel</Button>
         </div>
       </form>

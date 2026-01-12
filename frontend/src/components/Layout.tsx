@@ -10,7 +10,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
     { path: '/sites', label: 'Sites', icon: Settings },
     { path: '/staff', label: 'Staff List', icon: Users },
     { path: '/meetings', label: 'Meetings', icon: CalendarDays },
-    { path: '/contracts', label: 'Contracts', icon: FileText },
+    { path: '/contracts', label: 'Service Contracts', icon: FileText },
   ];
 
   return (

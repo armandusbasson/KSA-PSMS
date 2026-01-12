@@ -90,7 +90,7 @@ export const Dashboard: React.FC = () => {
             <Card className="cursor-pointer hover:shadow-lg transition-shadow duration-200" onClick={() => navigate('/contracts')}>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-gray-600 text-sm font-medium">Total Contracts</p>
+                  <p className="text-gray-600 text-sm font-medium">Total Service Contracts</p>
                   <p className="text-4xl font-bold text-gray-900">{contractStats?.total_contracts || 0}</p>
                 </div>
                 <FileText className="text-purple-600" size={32} />

@@ -77,10 +77,10 @@ export const ContractsList: React.FC = () => {
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-800">Contracts</h1>
+        <h1 className="text-3xl font-bold text-gray-800">Service Contracts</h1>
         <Button onClick={() => navigate('/contracts/create')}>
           <Plus size={16} className="inline mr-2" />
-          New Contract
+          New Service Contract
         </Button>
       </div>
 
