@@ -6,7 +6,7 @@ from app.crud import vehicle as crud_vehicle
 from app.schemas.vehicle import VehicleCreate, VehicleUpdate, VehicleResponse, VehicleDetailResponse
 from app.models.staff import Staff
 
-router = APIRouter(prefix="/vehicles", tags=["vehicles"])
+router = APIRouter(prefix="/api/vehicles", tags=["vehicles"])
 
 
 @router.get("", response_model=List[VehicleResponse])

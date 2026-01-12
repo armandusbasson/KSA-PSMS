@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useVehicles } from '../hooks/useVehicles';
-import { useSites } from '../hooks/useSites';
 import { useStaff } from '../hooks/useStaff';
 import { Card, Button, LoadingSpinner, ErrorMessage } from '../components/Common';
 import { Plus, Edit, Trash2 } from 'lucide-react';
-import { formatDate } from '../utils/formatters';
 import { Vehicle } from '../types';
 
 export const FleetList: React.FC = () => {

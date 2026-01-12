@@ -15,6 +15,9 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 # Base class for ORM models
 Base = declarative_base()
 
+# Import all models to ensure they are registered with SQLAlchemy
+from app.models import Site, SiteStaffLink, Staff, Meeting, MeetingItem, Contract, ContractType, ContractStatus, Vehicle, VehicleType, PrimaryUse
+
 def get_db():
     """Dependency for getting database session"""
     db = SessionLocal()

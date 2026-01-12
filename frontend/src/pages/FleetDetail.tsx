@@ -63,7 +63,7 @@ export const FleetDetail: React.FC = () => {
             </Button>
             <Button
               onClick={handleDelete}
-              variant="danger"
+              variant="destructive"
             >
               Delete
             </Button>
