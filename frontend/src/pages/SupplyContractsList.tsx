@@ -7,7 +7,7 @@ import { Plus, Edit, Trash2, Download, FileText } from 'lucide-react';
 import { formatDate, formatCurrency } from '../utils/formatters';
 import { Contract, ContractStatus } from '../types';
 
-export const ContractsList: React.FC = () => {
+export const SupplyContractsList: React.FC = () => {
   const navigate = useNavigate();
   const { contracts, loading, error, fetchContracts, deleteContract } = useContracts();
   const { sites, fetchSites } = useSites();
@@ -22,7 +22,7 @@ export const ContractsList: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    let filtered = contracts.filter(c => c.contract_type === 'Service');
+    let filtered = contracts.filter(c => c.contract_type === 'Supply');
 
     // Filter by status
     if (statusFilter) {
@@ -77,10 +77,10 @@ export const ContractsList: React.FC = () => {
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-800">Service Contracts</h1>
-        <Button onClick={() => navigate('/contracts/create')}>
+        <h1 className="text-3xl font-bold text-gray-800">Supply Contracts</h1>
+        <Button onClick={() => navigate('/supply-contracts/create')}>
           <Plus size={16} className="inline mr-2" />
-          New Service Contract
+          New Supply Contract
         </Button>
       </div>
 
@@ -112,7 +112,7 @@ export const ContractsList: React.FC = () => {
       {filteredContracts.length === 0 ? (
         <Card>
           <p className="text-gray-500 text-center py-8">
-            {searchTerm || statusFilter ? 'No contracts match your filters.' : 'No contracts found. Create one to get started.'}
+            {searchTerm || statusFilter ? 'No supply contracts match your filters.' : 'No supply contracts found. Create one to get started.'}
           </p>
         </Card>
       ) : (
@@ -135,7 +135,7 @@ export const ContractsList: React.FC = () => {
                 <tr 
                   key={contract.id} 
                   className="hover:bg-gray-50 cursor-pointer transition-colors"
-                  onClick={() => navigate(`/contracts/${contract.id}/view`)}
+                  onClick={() => navigate(`/supply-contracts/${contract.id}/view`)}
                 >
                   <td className="px-6 py-4 text-sm font-medium text-gray-900">
                     {contract.eskom_reference || contract.internal_quotation_number || `Contract #${contract.id}`}
@@ -151,7 +151,7 @@ export const ContractsList: React.FC = () => {
                   <td className="px-6 py-4 text-sm text-gray-600">{contract.contact_person_name || '-'}</td>
                   <td className="px-6 py-4 text-sm text-gray-600 font-medium">{contract.contract_value ? formatCurrency(contract.contract_value) : '-'}</td>
                   <td className="px-6 py-4 text-sm space-x-2" onClick={(e) => e.stopPropagation()}>
-                    <Link to={`/contracts/${contract.id}/edit`} className="inline">
+                    <Link to={`/supply-contracts/${contract.id}/edit`} className="inline">
                       <Button variant="secondary" className="px-3 py-1" title="Edit contract">
                         <Edit size={16} />
                       </Button>
@@ -161,7 +161,7 @@ export const ContractsList: React.FC = () => {
                         variant="secondary"
                         className="px-3 py-1"
                         title="Download document"
-                        onClick={() => navigate(`/contracts/${contract.id}/view`)}
+                        onClick={() => navigate(`/supply-contracts/${contract.id}/view`)}
                       >
                         <Download size={16} />
                       </Button>
@@ -171,7 +171,7 @@ export const ContractsList: React.FC = () => {
                         variant="secondary"
                         className="px-3 py-1"
                         title="View/Upload document"
-                        onClick={() => navigate(`/contracts/${contract.id}/view`)}
+                        onClick={() => navigate(`/supply-contracts/${contract.id}/view`)}
                       >
                         <FileText size={16} />
                       </Button>

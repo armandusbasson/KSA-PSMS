@@ -3,11 +3,12 @@ import { Layout } from './components/Layout';
 import { Dashboard } from './pages/Dashboard';
 import { SiteList } from './pages/SiteList';
 import { SiteDetail } from './pages/SiteDetail';
-import { SiteForm, MeetingForm, ContractForm } from './pages/FormPages';
+import { SiteForm, MeetingForm, ContractForm, SupplyContractForm } from './pages/FormPages';
 import { StaffList } from './pages/StaffList';
 import { MeetingList } from './pages/MeetingList';
 import { MeetingDetail } from './pages/MeetingDetail';
 import { ContractsList } from './pages/ContractsList';
+import { SupplyContractsList } from './pages/SupplyContractsList';
 import { ContractDetail } from './pages/ContractDetail';
 import { NotFound } from './pages/NotFound';
 import './index.css';
@@ -31,6 +32,10 @@ function App() {
           <Route path="/contracts/create" element={<ContractForm />} />
           <Route path="/contracts/:id/view" element={<ContractDetail />} />
           <Route path="/contracts/:id/edit" element={<ContractForm />} />
+          <Route path="/supply-contracts" element={<SupplyContractsList />} />
+          <Route path="/supply-contracts/create" element={<SupplyContractForm />} />
+          <Route path="/supply-contracts/:id/view" element={<ContractDetail />} />
+          <Route path="/supply-contracts/:id/edit" element={<SupplyContractForm />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Layout>

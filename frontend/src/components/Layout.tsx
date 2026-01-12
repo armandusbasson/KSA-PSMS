@@ -11,6 +11,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
     { path: '/staff', label: 'Staff List', icon: Users },
     { path: '/meetings', label: 'Meetings', icon: CalendarDays },
     { path: '/contracts', label: 'Service Contracts', icon: FileText },
+    { path: '/supply-contracts', label: 'Supply Contracts', icon: FileText },
   ];
 
   return (
