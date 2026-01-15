@@ -1,0 +1,35 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  width: 100%;
+}
+
+:root {
+  --primary: 3 102 214;
+  --primary-foreground: 255 255 255;
+  --secondary: 100 116 139;
+  --secondary-foreground: 255 255 255;
+  --destructive: 220 38 38;
+  --destructive-foreground: 255 255 255;
+  --muted: 148 163 184;
+  --muted-foreground: 15 23 42;
+  --accent: 59 130 246;
+  --accent-foreground: 15 23 42;
+  --border: 226 232 240;
+  --input: 226 232 240;
+  --ring: 59 130 246;
+  --background: 255 255 255;
+  --foreground: 15 23 42;
+  --radius: 0.5rem;
+}
