@@ -71,6 +71,20 @@ export const ContractsList: React.FC = () => {
     return sites.find(s => s.id === siteId)?.name || `Site #${siteId}`;
   };
 
+  // Calculate contract value from sections for Service contracts
+  const getContractDisplayValue = (contract: Contract): string => {
+    // For Service contracts, calculate from sections
+    if (contract.contract_type === 'Service' && contract.sections && contract.sections.length > 0) {
+      const total = contract.sections.reduce((sum, section) => {
+        const sectionTotal = section.line_items?.reduce((itemSum, item) => itemSum + (item.value || 0), 0) || 0;
+        return sum + sectionTotal;
+      }, 0);
+      return formatCurrency(total);
+    }
+    // Fallback to manual contract_value
+    return contract.contract_value ? formatCurrency(contract.contract_value) : '-';
+  };
+
   if (loading) return <LoadingSpinner />;
   if (error) return <ErrorMessage message={error} />;
 
@@ -149,7 +163,7 @@ export const ContractsList: React.FC = () => {
                     </span>
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600">{contract.contact_person_name || '-'}</td>
-                  <td className="px-6 py-4 text-sm text-gray-600 font-medium">{contract.contract_value ? formatCurrency(contract.contract_value) : '-'}</td>
+                  <td className="px-6 py-4 text-sm text-gray-600 font-medium">{getContractDisplayValue(contract)}</td>
                   <td className="px-6 py-4 text-sm space-x-2" onClick={(e) => e.stopPropagation()}>
                     <Link to={`/contracts/${contract.id}/edit`} className="inline">
                       <Button variant="secondary" className="px-3 py-1" title="Edit contract">
