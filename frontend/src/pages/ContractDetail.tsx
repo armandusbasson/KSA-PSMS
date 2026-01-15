@@ -249,12 +249,18 @@ export const ContractDetail: React.FC = () => {
             <p className="text-sm font-medium text-gray-600 mb-1">Responsible Staff Member</p>
             <p className="text-gray-900">{getStaffName(contract.responsible_staff_id)}</p>
           </div>
-          {contract.contract_value !== null && contract.contract_value !== undefined && (
+          {contract.contract_type === 'Service' ? (
+            <div>
+              <p className="text-sm font-medium text-gray-600 mb-1">Contract Value</p>
+              <p className="text-gray-900 font-semibold">{formatCurrency(getCalculatedTotal())}</p>
+              <p className="text-xs text-gray-500 mt-1">Calculated from sections</p>
+            </div>
+          ) : contract.contract_value !== null && contract.contract_value !== undefined ? (
             <div>
               <p className="text-sm font-medium text-gray-600 mb-1">Contract Value</p>
               <p className="text-gray-900 font-semibold">{formatCurrency(contract.contract_value)}</p>
             </div>
-          )}
+          ) : null}
         </div>
       </Card>
 

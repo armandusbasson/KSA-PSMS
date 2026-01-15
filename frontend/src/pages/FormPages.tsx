@@ -673,19 +673,13 @@ export const ContractForm: React.FC = () => {
               ))}
             </select>
           </div>
+        </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Contract Value (ZAR)</label>
-            <input
-              type="number"
-              step="0.01"
-              min="0"
-              value={formData.contract_value || ''}
-              onChange={(e) => setFormData({ ...formData, contract_value: e.target.value ? parseFloat(e.target.value) : undefined })}
-              placeholder="Enter contract value in South African Rand..."
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
-            />
-          </div>
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <p className="text-sm text-blue-800">
+            <strong>Note:</strong> Contract Value is automatically calculated from the Contract Breakdown sections. 
+            Add sections and line items after creating the contract to define the total value.
+          </p>
         </div>
 
         <div className="border-t pt-4">

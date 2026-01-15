@@ -6,7 +6,7 @@ import { Card, Button, LoadingSpinner, ErrorMessage } from '../components/Common
 import { ArrowLeft, Plus, Eye, Edit, Trash2 } from 'lucide-react';
 import { siteService, StaffRole } from '../api/siteService';
 import { formatDate, formatFullName, formatCurrency } from '../utils/formatters';
-import { Contract } from '../types';
+import { Contract, ContractSection } from '../types';
 
 interface SiteStaffMember {
   staff_id: number;
@@ -15,6 +15,19 @@ interface SiteStaffMember {
   staff_role?: string;
   site_role: StaffRole;
 }
+
+// Helper function to calculate contract value from sections for Service contracts
+const getContractDisplayValue = (contract: Contract): string => {
+  if (contract.contract_type === 'Service' && contract.sections && contract.sections.length > 0) {
+    const calculatedTotal = contract.sections.reduce((total: number, section: ContractSection) => {
+      const sectionTotal = section.line_items?.reduce((sum, item) => sum + (item.value || 0), 0) || 0;
+      return total + sectionTotal;
+    }, 0);
+    return formatCurrency(calculatedTotal);
+  }
+  // For Supply contracts or Service contracts without sections
+  return contract.contract_value ? formatCurrency(contract.contract_value) : '-';
+};
 
 export const SiteDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -296,7 +309,7 @@ export const SiteDetail: React.FC = () => {
                   <p className="text-gray-600">{formatDate(contract.start_date)} to {formatDate(contract.end_date)}</p>
                 </div>
                 <div className="col-span-2">
-                  <p className="text-gray-600 font-medium">{contract.contract_value ? formatCurrency(contract.contract_value) : '-'}</p>
+                  <p className="text-gray-600 font-medium">{getContractDisplayValue(contract)}</p>
                 </div>
                 <div className="col-span-2">
                   <p className="text-gray-600">{contract.contact_person_name || '-'}</p>
