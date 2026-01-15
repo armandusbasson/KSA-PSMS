@@ -7,8 +7,9 @@ import { useContracts } from '../hooks/useContracts';
 import { useVehicles } from '../hooks/useVehicles';
 import { Card, LoadingSpinner } from '../components/Common';
 import { formatDate } from '../utils/formatters';
-import { BarChart3, Users, CalendarDays, Eye, Truck, AlertCircle, Clock, CheckCircle } from 'lucide-react';
+import { BarChart3, Users, CalendarDays, Eye, Truck, AlertCircle, Clock, CheckCircle, TrendingUp } from 'lucide-react';
 import { ContractSummary } from '../types';
+import { currencyService, ExchangeRate } from '../api/currencyService';
 
 export const Dashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -21,6 +22,8 @@ export const Dashboard: React.FC = () => {
   const [supplyStats, setSupplyStats] = useState<any>(null);
   const [serviceStats, setServiceStats] = useState<any>(null);
   const [fleetRegistrationStats, setFleetRegistrationStats] = useState<any>(null);
+  const [exchangeRates, setExchangeRates] = useState<ExchangeRate[]>([]);
+  const [ratesLoading, setRatesLoading] = useState(false);
 
   useEffect(() => {
     fetchSites();
@@ -84,6 +87,24 @@ export const Dashboard: React.FC = () => {
       });
     }
   }, [vehicles]);
+
+  // Fetch exchange rates
+  useEffect(() => {
+    const fetchRates = async () => {
+      setRatesLoading(true);
+      const rates = await currencyService.getMultipleRates([
+        ['EUR', 'ZAR'],
+        ['USD', 'ZAR'],
+      ]);
+      setExchangeRates(rates);
+      setRatesLoading(false);
+    };
+    fetchRates();
+
+    // Refresh rates every 5 minutes
+    const interval = setInterval(fetchRates, 5 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   const loading = sitesLoading || staffLoading || meetingsLoading || vehiclesLoading || contractsLoading;
 
@@ -251,6 +272,44 @@ export const Dashboard: React.FC = () => {
               </div>
             </Card>
           )}
+
+          {/* Currency Exchange Rates */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            {ratesLoading ? (
+              <>
+                <Card className="flex items-center justify-center h-32">
+                  <p className="text-gray-500">Loading rates...</p>
+                </Card>
+                <Card className="flex items-center justify-center h-32">
+                  <p className="text-gray-500">Loading rates...</p>
+                </Card>
+              </>
+            ) : (
+              <>
+                {exchangeRates.map((rate) => (
+                  <Card key={`${rate.from}-${rate.to}`} className="hover:shadow-lg transition-shadow duration-200">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="text-2xl font-bold text-blue-600">1</div>
+                          <div className="text-sm font-semibold text-gray-700">{rate.from}</div>
+                        </div>
+                        <p className="text-sm text-gray-600 mb-3">Exchange Rate</p>
+                        <div className="flex items-baseline gap-1">
+                          <span className="text-3xl font-bold text-gray-900">{rate.rate.toFixed(2)}</span>
+                          <span className="text-sm font-semibold text-gray-700">{rate.to}</span>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-2">Last updated: {new Date(rate.timestamp).toLocaleTimeString()}</p>
+                      </div>
+                      <div className="text-blue-400">
+                        <TrendingUp size={48} strokeWidth={1.5} />
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </>
+            )}
+          </div>
 
           {/* Recent Meetings */}
           <Card className="mb-8">
