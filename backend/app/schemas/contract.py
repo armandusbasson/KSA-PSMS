@@ -1,7 +1,70 @@
 from pydantic import BaseModel, Field, EmailStr
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 from app.models.contract import ContractType, ContractStatus
+
+
+# Line Item Schemas
+class ContractLineItemBase(BaseModel):
+    """Base schema for contract line items"""
+    description: str = Field(..., max_length=500, description="Line item description")
+    value: float = Field(default=0, description="Line item value in ZAR")
+    order: int = Field(default=0, description="Order of the item within the section")
+
+
+class ContractLineItemCreate(ContractLineItemBase):
+    """Schema for creating a new line item"""
+    pass
+
+
+class ContractLineItemUpdate(BaseModel):
+    """Schema for updating a line item"""
+    description: Optional[str] = Field(None, max_length=500)
+    value: Optional[float] = None
+    order: Optional[int] = None
+
+
+class ContractLineItemResponse(ContractLineItemBase):
+    """Schema for line item response"""
+    id: int
+    section_id: int
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+# Section Schemas
+class ContractSectionBase(BaseModel):
+    """Base schema for contract sections"""
+    name: str = Field(..., max_length=255, description="Section name (e.g., 'Section A')")
+    description: Optional[str] = Field(None, max_length=500, description="Section description (e.g., 'Preliminary and General')")
+    order: int = Field(default=0, description="Order of the section")
+
+
+class ContractSectionCreate(ContractSectionBase):
+    """Schema for creating a new section"""
+    line_items: List[ContractLineItemCreate] = Field(default=[], description="Line items in this section")
+
+
+class ContractSectionUpdate(BaseModel):
+    """Schema for updating a section"""
+    name: Optional[str] = Field(None, max_length=255)
+    description: Optional[str] = Field(None, max_length=500)
+    order: Optional[int] = None
+
+
+class ContractSectionResponse(ContractSectionBase):
+    """Schema for section response"""
+    id: int
+    contract_id: int
+    line_items: List[ContractLineItemResponse] = []
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
 
 
 class ContractBase(BaseModel):
@@ -22,7 +85,7 @@ class ContractBase(BaseModel):
 
 class ContractCreate(ContractBase):
     """Schema for creating a new contract"""
-    pass
+    sections: List[ContractSectionCreate] = Field(default=[], description="Contract sections with line items (for Service contracts)")
 
 
 class ContractUpdate(BaseModel):
@@ -46,6 +109,7 @@ class ContractResponse(ContractBase):
     id: int
     document_filename: Optional[str] = None
     document_path: Optional[str] = None
+    sections: List[ContractSectionResponse] = []
     created_at: datetime
     updated_at: datetime
 

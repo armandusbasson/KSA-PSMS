@@ -260,3 +260,101 @@ def delete_contract_file(contract_id: int, db: Session = Depends(get_db)):
 
 # Import Site model
 from app.models.site import Site
+
+# Import section and line item schemas
+from app.schemas.contract import (
+    ContractSectionCreate, ContractSectionUpdate, ContractSectionResponse,
+    ContractLineItemCreate, ContractLineItemUpdate, ContractLineItemResponse
+)
+
+
+# Contract Sections endpoints
+@router.get("/{contract_id}/sections", response_model=list[ContractSectionResponse])
+def list_contract_sections(contract_id: int, db: Session = Depends(get_db)):
+    """Get all sections for a contract"""
+    contract = crud_contract.get_contract(db, contract_id)
+    if not contract:
+        raise HTTPException(status_code=404, detail="Contract not found")
+    
+    return crud_contract.get_sections_by_contract(db, contract_id)
+
+
+@router.post("/{contract_id}/sections", response_model=ContractSectionResponse)
+def create_contract_section(
+    contract_id: int,
+    section: ContractSectionCreate,
+    db: Session = Depends(get_db)
+):
+    """Create a new section for a contract"""
+    contract = crud_contract.get_contract(db, contract_id)
+    if not contract:
+        raise HTTPException(status_code=404, detail="Contract not found")
+    
+    return crud_contract.create_section(db, contract_id, section)
+
+
+@router.put("/sections/{section_id}", response_model=ContractSectionResponse)
+def update_contract_section(
+    section_id: int,
+    section_update: ContractSectionUpdate,
+    db: Session = Depends(get_db)
+):
+    """Update a contract section"""
+    updated = crud_contract.update_section(db, section_id, section_update)
+    if not updated:
+        raise HTTPException(status_code=404, detail="Section not found")
+    return updated
+
+
+@router.delete("/sections/{section_id}")
+def delete_contract_section(section_id: int, db: Session = Depends(get_db)):
+    """Delete a contract section"""
+    if not crud_contract.delete_section(db, section_id):
+        raise HTTPException(status_code=404, detail="Section not found")
+    return {"message": "Section deleted successfully"}
+
+
+# Contract Line Items endpoints
+@router.get("/sections/{section_id}/items", response_model=list[ContractLineItemResponse])
+def list_section_items(section_id: int, db: Session = Depends(get_db)):
+    """Get all line items for a section"""
+    section = crud_contract.get_section(db, section_id)
+    if not section:
+        raise HTTPException(status_code=404, detail="Section not found")
+    
+    return crud_contract.get_line_items_by_section(db, section_id)
+
+
+@router.post("/sections/{section_id}/items", response_model=ContractLineItemResponse)
+def create_section_item(
+    section_id: int,
+    item: ContractLineItemCreate,
+    db: Session = Depends(get_db)
+):
+    """Create a new line item for a section"""
+    section = crud_contract.get_section(db, section_id)
+    if not section:
+        raise HTTPException(status_code=404, detail="Section not found")
+    
+    return crud_contract.create_line_item(db, section_id, item)
+
+
+@router.put("/items/{item_id}", response_model=ContractLineItemResponse)
+def update_line_item(
+    item_id: int,
+    item_update: ContractLineItemUpdate,
+    db: Session = Depends(get_db)
+):
+    """Update a line item"""
+    updated = crud_contract.update_line_item(db, item_id, item_update)
+    if not updated:
+        raise HTTPException(status_code=404, detail="Line item not found")
+    return updated
+
+
+@router.delete("/items/{item_id}")
+def delete_line_item(item_id: int, db: Session = Depends(get_db)):
+    """Delete a line item"""
+    if not crud_contract.delete_line_item(db, item_id):
+        raise HTTPException(status_code=404, detail="Line item not found")
+    return {"message": "Line item deleted successfully"}

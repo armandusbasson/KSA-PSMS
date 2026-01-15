@@ -4,6 +4,8 @@ import {
   CreateContractInput,
   UpdateContractInput,
   ContractSummary,
+  ContractSection,
+  ContractLineItem,
 } from '../types';
 
 export const contractService = {
@@ -114,5 +116,45 @@ export const contractService = {
 
   async deleteFile(contractId: number): Promise<void> {
     await client.delete(`/api/contracts/${contractId}/file`);
+  },
+
+  // Section methods
+  async getSections(contractId: number): Promise<ContractSection[]> {
+    const response = await client.get(`/api/contracts/${contractId}/sections`);
+    return response.data;
+  },
+
+  async createSection(contractId: number, section: Omit<ContractSection, 'id' | 'contract_id' | 'created_at' | 'updated_at'>): Promise<ContractSection> {
+    const response = await client.post(`/api/contracts/${contractId}/sections`, section);
+    return response.data;
+  },
+
+  async updateSection(sectionId: number, section: Partial<ContractSection>): Promise<ContractSection> {
+    const response = await client.put(`/api/contracts/sections/${sectionId}`, section);
+    return response.data;
+  },
+
+  async deleteSection(sectionId: number): Promise<void> {
+    await client.delete(`/api/contracts/sections/${sectionId}`);
+  },
+
+  // Line item methods
+  async getLineItems(sectionId: number): Promise<ContractLineItem[]> {
+    const response = await client.get(`/api/contracts/sections/${sectionId}/items`);
+    return response.data;
+  },
+
+  async createLineItem(sectionId: number, item: Omit<ContractLineItem, 'id' | 'section_id' | 'created_at' | 'updated_at'>): Promise<ContractLineItem> {
+    const response = await client.post(`/api/contracts/sections/${sectionId}/items`, item);
+    return response.data;
+  },
+
+  async updateLineItem(itemId: number, item: Partial<ContractLineItem>): Promise<ContractLineItem> {
+    const response = await client.put(`/api/contracts/items/${itemId}`, item);
+    return response.data;
+  },
+
+  async deleteLineItem(itemId: number): Promise<void> {
+    await client.delete(`/api/contracts/items/${itemId}`);
   },
 };

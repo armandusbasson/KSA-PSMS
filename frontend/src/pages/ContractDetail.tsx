@@ -4,8 +4,10 @@ import { useContracts } from '../hooks/useContracts';
 import { useStaff } from '../hooks/useStaff';
 import { useSites } from '../hooks/useSites';
 import { Card, Button, LoadingSpinner, ErrorMessage } from '../components/Common';
-import { ArrowLeft, Edit, Download, Upload, Trash2 } from 'lucide-react';
+import { ArrowLeft, Edit, Download, Upload, Trash2, Plus, X } from 'lucide-react';
 import { formatDate, formatFullName, formatCurrency } from '../utils/formatters';
+import { contractService } from '../api/contractService';
+import { ContractSection, ContractLineItem } from '../types';
 
 export const ContractDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -19,6 +21,14 @@ export const ContractDetail: React.FC = () => {
   const [fileLoading, setFileLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
+
+  // Section management state
+  const [sectionLoading, setSectionLoading] = useState(false);
+  const [showAddSection, setShowAddSection] = useState(false);
+  const [newSection, setNewSection] = useState({ name: '', description: '' });
+  const [editingSection, setEditingSection] = useState<number | null>(null);
+  const [showAddItem, setShowAddItem] = useState<number | null>(null);
+  const [newItem, setNewItem] = useState({ description: '', value: 0 });
 
   useEffect(() => {
     const loadData = async () => {
@@ -35,6 +45,94 @@ export const ContractDetail: React.FC = () => {
     };
     loadData();
   }, [id]);
+
+  // Section management functions
+  const handleAddSection = async () => {
+    if (!id || !newSection.name.trim()) return;
+    setSectionLoading(true);
+    try {
+      const sections = contract.sections || [];
+      await contractService.createSection(parseInt(id), {
+        name: newSection.name,
+        description: newSection.description,
+        order: sections.length,
+        line_items: [],
+      });
+      // Reload contract
+      const data = await fetchContract(parseInt(id));
+      setContract(data);
+      setNewSection({ name: '', description: '' });
+      setShowAddSection(false);
+    } catch (err: any) {
+      setError(err.message || 'Failed to add section');
+    } finally {
+      setSectionLoading(false);
+    }
+  };
+
+  const handleDeleteSection = async (sectionId: number) => {
+    if (!window.confirm('Are you sure you want to delete this section and all its line items?')) return;
+    setSectionLoading(true);
+    try {
+      await contractService.deleteSection(sectionId);
+      // Reload contract
+      const data = await fetchContract(parseInt(id!));
+      setContract(data);
+    } catch (err: any) {
+      setError(err.message || 'Failed to delete section');
+    } finally {
+      setSectionLoading(false);
+    }
+  };
+
+  const handleAddLineItem = async (sectionId: number) => {
+    if (!newItem.description.trim()) return;
+    setSectionLoading(true);
+    try {
+      const section = contract.sections?.find((s: ContractSection) => s.id === sectionId);
+      const items = section?.line_items || [];
+      await contractService.createLineItem(sectionId, {
+        description: newItem.description,
+        value: newItem.value,
+        order: items.length,
+      });
+      // Reload contract
+      const data = await fetchContract(parseInt(id!));
+      setContract(data);
+      setNewItem({ description: '', value: 0 });
+      setShowAddItem(null);
+    } catch (err: any) {
+      setError(err.message || 'Failed to add line item');
+    } finally {
+      setSectionLoading(false);
+    }
+  };
+
+  const handleDeleteLineItem = async (itemId: number) => {
+    if (!window.confirm('Are you sure you want to delete this line item?')) return;
+    setSectionLoading(true);
+    try {
+      await contractService.deleteLineItem(itemId);
+      // Reload contract
+      const data = await fetchContract(parseInt(id!));
+      setContract(data);
+    } catch (err: any) {
+      setError(err.message || 'Failed to delete line item');
+    } finally {
+      setSectionLoading(false);
+    }
+  };
+
+  // Calculate section subtotal
+  const getSectionSubtotal = (section: ContractSection): number => {
+    return section.line_items?.reduce((sum, item) => sum + (item.value || 0), 0) || 0;
+  };
+
+  // Calculate total contract value from sections
+  const getCalculatedTotal = (): number => {
+    return contract.sections?.reduce((sum: number, section: ContractSection) => 
+      sum + getSectionSubtotal(section), 0) || 0;
+  };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -199,6 +297,178 @@ export const ContractDetail: React.FC = () => {
         <Card className="mb-6">
           <h2 className="text-xl font-semibold mb-4">Notes</h2>
           <p className="text-gray-700 whitespace-pre-wrap">{contract.notes}</p>
+        </Card>
+      )}
+
+      {/* Contract Sections - Only for Service Contracts */}
+      {contract.contract_type === 'Service' && (
+        <Card className="mb-6">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold">Contract Breakdown</h2>
+            <Button
+              onClick={() => setShowAddSection(true)}
+              disabled={sectionLoading}
+              variant="secondary"
+            >
+              <Plus size={16} className="inline mr-2" />
+              Add Section
+            </Button>
+          </div>
+
+          {/* Add Section Form */}
+          {showAddSection && (
+            <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+              <h3 className="font-medium mb-3">Add New Section</h3>
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm text-gray-600 mb-1">Section Name</label>
+                  <input
+                    type="text"
+                    value={newSection.name}
+                    onChange={(e) => setNewSection({ ...newSection, name: e.target.value })}
+                    placeholder="e.g., Section A"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-600 mb-1">Description</label>
+                  <input
+                    type="text"
+                    value={newSection.description}
+                    onChange={(e) => setNewSection({ ...newSection, description: e.target.value })}
+                    placeholder="e.g., Preliminary and General"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+                  />
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Button onClick={handleAddSection} disabled={sectionLoading || !newSection.name.trim()}>
+                  {sectionLoading ? 'Adding...' : 'Add Section'}
+                </Button>
+                <Button variant="secondary" onClick={() => { setShowAddSection(false); setNewSection({ name: '', description: '' }); }}>
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Display Sections */}
+          {contract.sections && contract.sections.length > 0 ? (
+            <div className="space-y-6">
+              {contract.sections.map((section: ContractSection) => (
+                <div key={section.id} className="border border-gray-200 rounded-lg overflow-hidden">
+                  {/* Section Header */}
+                  <div className="bg-gray-100 px-4 py-3 flex justify-between items-center">
+                    <div>
+                      <h3 className="font-semibold text-gray-800">{section.name}</h3>
+                      {section.description && (
+                        <p className="text-sm text-gray-600">{section.description}</p>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="secondary"
+                        className="px-3 py-1 text-sm"
+                        onClick={() => setShowAddItem(section.id!)}
+                      >
+                        <Plus size={14} className="inline mr-1" />
+                        Add Item
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        className="px-3 py-1 text-sm"
+                        onClick={() => handleDeleteSection(section.id!)}
+                      >
+                        <Trash2 size={14} />
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Add Line Item Form */}
+                  {showAddItem === section.id && (
+                    <div className="px-4 py-3 bg-blue-50 border-b border-gray-200">
+                      <div className="flex gap-4 items-end">
+                        <div className="flex-1">
+                          <label className="block text-sm text-gray-600 mb-1">Description</label>
+                          <input
+                            type="text"
+                            value={newItem.description}
+                            onChange={(e) => setNewItem({ ...newItem, description: e.target.value })}
+                            placeholder="e.g., Site Establishment"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+                          />
+                        </div>
+                        <div className="w-40">
+                          <label className="block text-sm text-gray-600 mb-1">Value (R)</label>
+                          <input
+                            type="number"
+                            value={newItem.value}
+                            onChange={(e) => setNewItem({ ...newItem, value: parseFloat(e.target.value) || 0 })}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+                          />
+                        </div>
+                        <Button onClick={() => handleAddLineItem(section.id!)} disabled={sectionLoading || !newItem.description.trim()}>
+                          Add
+                        </Button>
+                        <Button variant="secondary" onClick={() => { setShowAddItem(null); setNewItem({ description: '', value: 0 }); }}>
+                          <X size={16} />
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Line Items Table */}
+                  {section.line_items && section.line_items.length > 0 ? (
+                    <table className="w-full">
+                      <tbody>
+                        {section.line_items.map((item: ContractLineItem) => (
+                          <tr key={item.id} className="border-b border-gray-100 hover:bg-gray-50">
+                            <td className="px-4 py-3 pl-8 text-gray-700">{item.description}</td>
+                            <td className="px-4 py-3 text-right font-medium text-gray-900 w-40">
+                              {formatCurrency(item.value)}
+                            </td>
+                            <td className="px-4 py-3 w-16">
+                              <button
+                                onClick={() => handleDeleteLineItem(item.id!)}
+                                className="text-red-600 hover:text-red-800 p-1"
+                                title="Delete item"
+                              >
+                                <X size={16} />
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                      <tfoot>
+                        <tr className="bg-gray-50 font-semibold">
+                          <td className="px-4 py-3 text-gray-700">Sub-Total</td>
+                          <td className="px-4 py-3 text-right text-gray-900 w-40">
+                            {formatCurrency(getSectionSubtotal(section))}
+                          </td>
+                          <td className="w-16"></td>
+                        </tr>
+                      </tfoot>
+                    </table>
+                  ) : (
+                    <div className="px-4 py-6 text-center text-gray-500">
+                      No line items yet. Click "Add Item" to add one.
+                    </div>
+                  )}
+                </div>
+              ))}
+
+              {/* Total Contract Value */}
+              <div className="bg-gray-800 text-white rounded-lg px-6 py-4 flex justify-between items-center">
+                <span className="text-lg font-semibold">Total Contract Value</span>
+                <span className="text-2xl font-bold">{formatCurrency(getCalculatedTotal())}</span>
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-8 border-2 border-dashed border-gray-300 rounded-lg">
+              <p className="text-gray-600 mb-2">No contract breakdown defined yet.</p>
+              <p className="text-sm text-gray-500">Click "Add Section" to start building your contract breakdown.</p>
+            </div>
+          )}
         </Card>
       )}
 

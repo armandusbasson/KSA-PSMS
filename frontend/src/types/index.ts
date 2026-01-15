@@ -127,6 +127,29 @@ export interface UpdateMeetingInput {
 export type ContractType = 'Supply' | 'Service';
 export type ContractStatus = 'Active' | 'Expired' | 'Completed' | 'Cancelled';
 
+// Contract Line Item types
+export interface ContractLineItem {
+  id?: number;
+  section_id?: number;
+  description: string;
+  value: number;
+  order: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
+// Contract Section types
+export interface ContractSection {
+  id?: number;
+  contract_id?: number;
+  name: string;
+  description?: string;
+  order: number;
+  line_items: ContractLineItem[];
+  created_at?: string;
+  updated_at?: string;
+}
+
 export interface Contract {
   id: number;
   contract_type: ContractType;
@@ -145,6 +168,7 @@ export interface Contract {
   notes?: string;
   document_filename?: string;
   document_path?: string;
+  sections?: ContractSection[];
   created_at: string;
   updated_at: string;
 }
@@ -168,6 +192,7 @@ export interface CreateContractInput {
   contact_person_email?: string;
   contract_value?: number;
   notes?: string;
+  sections?: ContractSection[];
 }
 
 export interface UpdateContractInput {

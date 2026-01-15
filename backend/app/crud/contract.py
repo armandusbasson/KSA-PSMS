@@ -1,8 +1,12 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
 from datetime import datetime
-from app.models.contract import Contract, ContractStatus
-from app.schemas.contract import ContractCreate, ContractUpdate
+from app.models.contract import Contract, ContractStatus, ContractSection, ContractLineItem
+from app.schemas.contract import (
+    ContractCreate, ContractUpdate, 
+    ContractSectionCreate, ContractSectionUpdate,
+    ContractLineItemCreate, ContractLineItemUpdate
+)
 
 
 def get_contract(db: Session, contract_id: int) -> Contract | None:
@@ -70,7 +74,7 @@ def update_expired_contracts(db: Session) -> int:
 
 
 def create_contract(db: Session, contract: ContractCreate) -> Contract:
-    """Create a new contract"""
+    """Create a new contract with optional sections and line items"""
     db_contract = Contract(
         contract_type=contract.contract_type,
         start_date=contract.start_date,
@@ -86,6 +90,29 @@ def create_contract(db: Session, contract: ContractCreate) -> Contract:
         notes=contract.notes,
     )
     db.add(db_contract)
+    db.flush()  # Get the contract ID
+    
+    # Add sections and line items if provided
+    if contract.sections:
+        for section_data in contract.sections:
+            db_section = ContractSection(
+                contract_id=db_contract.id,
+                name=section_data.name,
+                description=section_data.description,
+                order=section_data.order,
+            )
+            db.add(db_section)
+            db.flush()  # Get the section ID
+            
+            for item_data in section_data.line_items:
+                db_item = ContractLineItem(
+                    section_id=db_section.id,
+                    description=item_data.description,
+                    value=item_data.value,
+                    order=item_data.order,
+                )
+                db.add(db_item)
+    
     db.commit()
     db.refresh(db_contract)
     return db_contract
@@ -197,3 +224,123 @@ def get_contract_summary_by_type(db: Session, contract_type: str) -> dict:
         "cancelled_count": cancelled,
         "contract_type": contract_type,
     }
+
+
+# Contract Section CRUD operations
+def get_section(db: Session, section_id: int) -> ContractSection | None:
+    """Get a section by ID"""
+    return db.query(ContractSection).filter(ContractSection.id == section_id).first()
+
+
+def get_sections_by_contract(db: Session, contract_id: int) -> list[ContractSection]:
+    """Get all sections for a contract"""
+    return db.query(ContractSection).filter(ContractSection.contract_id == contract_id).order_by(ContractSection.order).all()
+
+
+def create_section(db: Session, contract_id: int, section: ContractSectionCreate) -> ContractSection:
+    """Create a new section for a contract"""
+    db_section = ContractSection(
+        contract_id=contract_id,
+        name=section.name,
+        description=section.description,
+        order=section.order,
+    )
+    db.add(db_section)
+    db.flush()
+    
+    # Add line items if provided
+    for item_data in section.line_items:
+        db_item = ContractLineItem(
+            section_id=db_section.id,
+            description=item_data.description,
+            value=item_data.value,
+            order=item_data.order,
+        )
+        db.add(db_item)
+    
+    db.commit()
+    db.refresh(db_section)
+    return db_section
+
+
+def update_section(db: Session, section_id: int, section_update: ContractSectionUpdate) -> ContractSection | None:
+    """Update a section"""
+    db_section = get_section(db, section_id)
+    if not db_section:
+        return None
+    
+    update_data = section_update.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
+        if hasattr(db_section, field):
+            setattr(db_section, field, value)
+    
+    db_section.updated_at = datetime.utcnow()
+    db.add(db_section)
+    db.commit()
+    db.refresh(db_section)
+    return db_section
+
+
+def delete_section(db: Session, section_id: int) -> bool:
+    """Delete a section and its line items"""
+    db_section = get_section(db, section_id)
+    if not db_section:
+        return False
+    
+    db.delete(db_section)
+    db.commit()
+    return True
+
+
+# Contract Line Item CRUD operations
+def get_line_item(db: Session, item_id: int) -> ContractLineItem | None:
+    """Get a line item by ID"""
+    return db.query(ContractLineItem).filter(ContractLineItem.id == item_id).first()
+
+
+def get_line_items_by_section(db: Session, section_id: int) -> list[ContractLineItem]:
+    """Get all line items for a section"""
+    return db.query(ContractLineItem).filter(ContractLineItem.section_id == section_id).order_by(ContractLineItem.order).all()
+
+
+def create_line_item(db: Session, section_id: int, item: ContractLineItemCreate) -> ContractLineItem:
+    """Create a new line item for a section"""
+    db_item = ContractLineItem(
+        section_id=section_id,
+        description=item.description,
+        value=item.value,
+        order=item.order,
+    )
+    db.add(db_item)
+    db.commit()
+    db.refresh(db_item)
+    return db_item
+
+
+def update_line_item(db: Session, item_id: int, item_update: ContractLineItemUpdate) -> ContractLineItem | None:
+    """Update a line item"""
+    db_item = get_line_item(db, item_id)
+    if not db_item:
+        return None
+    
+    update_data = item_update.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
+        if hasattr(db_item, field):
+            setattr(db_item, field, value)
+    
+    db_item.updated_at = datetime.utcnow()
+    db.add(db_item)
+    db.commit()
+    db.refresh(db_item)
+    return db_item
+
+
+def delete_line_item(db: Session, item_id: int) -> bool:
+    """Delete a line item"""
+    db_item = get_line_item(db, item_id)
+    if not db_item:
+        return False
+    
+    db.delete(db_item)
+    db.commit()
+    return True
