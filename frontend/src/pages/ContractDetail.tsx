@@ -26,7 +26,6 @@ export const ContractDetail: React.FC = () => {
   const [sectionLoading, setSectionLoading] = useState(false);
   const [showAddSection, setShowAddSection] = useState(false);
   const [newSection, setNewSection] = useState({ name: '', description: '' });
-  const [editingSection, setEditingSection] = useState<number | null>(null);
   const [showAddItem, setShowAddItem] = useState<number | null>(null);
   const [newItem, setNewItem] = useState({ description: '', value: 0 });
 
