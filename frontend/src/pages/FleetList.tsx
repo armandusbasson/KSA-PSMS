@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useVehicles } from '../hooks/useVehicles';
 import { useStaff } from '../hooks/useStaff';
 import { Card, Button, LoadingSpinner, ErrorMessage } from '../components/Common';
@@ -8,6 +8,7 @@ import { Vehicle } from '../types';
 
 export const FleetList: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { vehicles, loading, error, fetchVehicles, deleteVehicle } = useVehicles();
   const { staff, fetchStaff } = useStaff();
   
@@ -15,6 +16,13 @@ export const FleetList: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [typeFilter, setTypeFilter] = useState('');
   const [registrationStatusFilter, setRegistrationStatusFilter] = useState('');
+
+  // Initialize filter from navigation state
+  useEffect(() => {
+    if (location.state?.registrationStatusFilter) {
+      setRegistrationStatusFilter(location.state.registrationStatusFilter);
+    }
+  }, [location.state]);
 
   useEffect(() => {
     fetchVehicles();

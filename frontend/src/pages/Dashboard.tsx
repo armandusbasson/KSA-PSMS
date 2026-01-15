@@ -218,21 +218,30 @@ export const Dashboard: React.FC = () => {
             <Card className="mb-8">
               <h2 className="text-xl font-semibold mb-4">Fleet Registration Status</h2>
               <div className="grid grid-cols-3 gap-4">
-                <div className="p-4 bg-green-50 rounded-lg">
+                <div 
+                  className="p-4 bg-green-50 rounded-lg cursor-pointer hover:shadow-lg transition-shadow duration-200" 
+                  onClick={() => navigate('/fleet', { state: { registrationStatusFilter: 'active' } })}
+                >
                   <div className="flex items-center gap-2 mb-2">
                     <CheckCircle className="text-green-600" size={20} />
                     <p className="text-sm text-gray-600">Active</p>
                   </div>
                   <p className="text-3xl font-bold text-green-600">{fleetRegistrationStats.active}</p>
                 </div>
-                <div className="p-4 bg-yellow-50 rounded-lg">
+                <div 
+                  className="p-4 bg-yellow-50 rounded-lg cursor-pointer hover:shadow-lg transition-shadow duration-200" 
+                  onClick={() => navigate('/fleet', { state: { registrationStatusFilter: 'expiring' } })}
+                >
                   <div className="flex items-center gap-2 mb-2">
                     <Clock className="text-yellow-600" size={20} />
                     <p className="text-sm text-gray-600">Expiring in 30 Days</p>
                   </div>
                   <p className="text-3xl font-bold text-yellow-600">{fleetRegistrationStats.expiring}</p>
                 </div>
-                <div className="p-4 bg-red-50 rounded-lg">
+                <div 
+                  className="p-4 bg-red-50 rounded-lg cursor-pointer hover:shadow-lg transition-shadow duration-200" 
+                  onClick={() => navigate('/fleet', { state: { registrationStatusFilter: 'expired' } })}
+                >
                   <div className="flex items-center gap-2 mb-2">
                     <AlertCircle className="text-red-600" size={20} />
                     <p className="text-sm text-gray-600">Expired</p>
