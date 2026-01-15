@@ -43,6 +43,57 @@ export const FleetDetail: React.FC = () => {
     }
   };
 
+  const getDepreciation = (vehicle: VehicleDetail): { percentage: number; label: string; color: string; bgColor: string } => {
+    if (!vehicle.purchase_date) {
+      return { percentage: 0, label: 'Unknown', color: 'text-gray-600', bgColor: 'bg-gray-100' };
+    }
+
+    const today = new Date();
+    const purchaseDate = new Date(vehicle.purchase_date);
+    const deprecationPeriodYears = 5;
+    const deprecationPeriodMs = deprecationPeriodYears * 365.25 * 24 * 60 * 60 * 1000;
+    
+    const ageMs = today.getTime() - purchaseDate.getTime();
+    const percentage = Math.min((ageMs / deprecationPeriodMs) * 100, 100);
+
+    if (percentage >= 100) {
+      return { 
+        percentage: 100, 
+        label: 'Fully Depreciated', 
+        color: 'text-red-600', 
+        bgColor: 'bg-red-100' 
+      };
+    } else if (percentage >= 75) {
+      return { 
+        percentage: Math.round(percentage), 
+        label: `${Math.round(percentage)}% Depreciated`, 
+        color: 'text-orange-600', 
+        bgColor: 'bg-orange-100' 
+      };
+    } else if (percentage >= 50) {
+      return { 
+        percentage: Math.round(percentage), 
+        label: `${Math.round(percentage)}% Depreciated`, 
+        color: 'text-yellow-600', 
+        bgColor: 'bg-yellow-100' 
+      };
+    } else if (percentage >= 25) {
+      return { 
+        percentage: Math.round(percentage), 
+        label: `${Math.round(percentage)}% Depreciated`, 
+        color: 'text-blue-600', 
+        bgColor: 'bg-blue-100' 
+      };
+    } else {
+      return { 
+        percentage: Math.round(percentage), 
+        label: `${Math.round(percentage)}% Depreciated`, 
+        color: 'text-green-600', 
+        bgColor: 'bg-green-100' 
+      };
+    }
+  };
+
   useEffect(() => {
     fetchStaff();
   }, []);
@@ -201,6 +252,12 @@ export const FleetDetail: React.FC = () => {
                 <p className="text-lg font-medium text-gray-800">
                   {vehicle.purchase_date ? new Date(vehicle.purchase_date).toLocaleDateString() : '-'}
                 </p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Depreciation Status</p>
+                <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold ${getDepreciation(vehicle).bgColor}`}>
+                  <span className={getDepreciation(vehicle).color}>{getDepreciation(vehicle).label}</span>
+                </div>
               </div>
             </div>
           </div>
