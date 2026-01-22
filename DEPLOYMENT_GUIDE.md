@@ -32,12 +32,45 @@ git clone https://github.com/armandusbasson/KSA-PSMS.git
 cd KSA-PSMS
 ```
 
-### 3. Build and Start the Application
+### 3. Configure Environment Variables
+
+Create a `.env` file with your server's configuration:
+
+```bash
+# Copy the example file
+cp .env.example .env
+
+# Edit the configuration
+nano .env
+```
+
+Update the `VITE_API_BASE_URL` to match your server:
+
+```env
+# Backend Configuration
+DATABASE_URL=sqlite:////app/db/app.db
+DEBUG=true
+
+# Frontend Configuration
+# Replace with your server's IP address or domain
+VITE_API_BASE_URL=http://YOUR_SERVER_IP:8000
+```
+
+**Examples:**
+- For IP address: `VITE_API_BASE_URL=http://192.168.1.100:8000`
+- For domain: `VITE_API_BASE_URL=http://erp.yourcompany.com:8000`
+- With Nginx (no port): `VITE_API_BASE_URL=http://erp.yourcompany.com/api`
+
+**Important:** Press `Ctrl+X`, then `Y`, then `Enter` to save in nano.
+
+### 4. Build and Start the Application
 
 ```bash
 # Build and start all services in detached mode
 docker compose up --build -d
 ```
+
+**Note:** The build process reads the `VITE_API_BASE_URL` from your `.env` file and bakes it into the frontend build. If you change the server IP/domain later, you'll need to rebuild: `docker compose up --build -d`
 
 This command will:
 - Build the backend (Python/FastAPI) container
@@ -54,7 +87,7 @@ This command will:
 ✔ Container ksa_frontend  Started
 ```
 
-### 4. Verify Deployment
+### 5. Verify Deployment
 
 Check that containers are running:
 ```bash
@@ -65,13 +98,13 @@ You should see two containers:
 - `ksa_backend` (port 8000)
 - `ksa_frontend` (port 3000)
 
-### 5. Access the Application
+### 6. Access the Application
 
 - **Frontend:** http://your-server-ip:3000
 - **Backend API:** http://your-server-ip:8000
 - **API Documentation:** http://your-server-ip:8000/docs
 
-### 6. Default Login Credentials
+### 7. Default Login Credentials
 
 **Username:** `admin`  
 **Password:** `admin123`
@@ -231,6 +264,28 @@ exit
 ```
 
 ## Troubleshooting
+
+### Frontend Points to Wrong Server / localhost
+
+If the frontend is trying to connect to localhost instead of your server:
+
+1. **Check your `.env` file:**
+   ```bash
+   cat .env
+   ```
+   Make sure `VITE_API_BASE_URL` points to your server's IP or domain, not localhost.
+
+2. **Rebuild the frontend:**
+   ```bash
+   # The API URL is baked in at build time
+   docker compose up --build -d frontend
+   ```
+
+3. **Verify the build used correct URL:**
+   ```bash
+   # Check frontend logs during build
+   docker compose logs frontend
+   ```
 
 ### Containers Won't Start
 

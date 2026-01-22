@@ -6,8 +6,7 @@ import { useMeetings } from '../hooks/useMeetings';
 import { useContracts } from '../hooks/useContracts';
 import { useVehicles } from '../hooks/useVehicles';
 import { Card, LoadingSpinner } from '../components/Common';
-import { formatDate } from '../utils/formatters';
-import { BarChart3, Users, CalendarDays, Eye, Truck, AlertCircle, Clock, CheckCircle, TrendingUp } from 'lucide-react';
+import { BarChart3, Users, CalendarDays, Truck, AlertCircle, Clock, CheckCircle, TrendingUp } from 'lucide-react';
 import { ContractSummary } from '../types';
 import { currencyService, ExchangeRate } from '../api/currencyService';
 
@@ -311,59 +310,7 @@ export const Dashboard: React.FC = () => {
             )}
           </div>
 
-          {/* Recent Meetings */}
-          <Card className="mb-8">
-            <h2 className="text-xl font-semibold mb-4">Recent Meetings</h2>
-            {meetings.length === 0 ? (
-              <p className="text-gray-500">No meetings scheduled</p>
-            ) : (
-              <div className="space-y-3">
-                {meetings.slice(0, 5).map((meeting) => {
-                  const siteName = sites.find((s: any) => s.id === meeting.site_id)?.name || 'Unknown Site';
-                  return (
-                    <div key={meeting.id} className="flex justify-between items-center pb-3 border-b border-gray-200 last:border-b-0 hover:bg-gray-50 p-2 rounded cursor-pointer transition-colors" onClick={() => navigate(`/meetings/${meeting.id}`)}>
-                      <div className="flex-1">
-                        <p className="font-medium text-gray-900">{meeting.agenda || `Meeting #${meeting.id}`}</p>
-                        <p className="text-sm text-gray-600">{siteName}</p>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <span className="text-sm text-gray-600">{formatDate(meeting.created_at)}</span>
-                        <button
-                          onClick={(e: React.MouseEvent) => {
-                            e.stopPropagation();
-                            navigate(`/meetings/${meeting.id}`);
-                          }}
-                          className="p-2 text-blue-600 hover:bg-blue-50 rounded transition-colors"
-                          title="View meeting"
-                        >
-                          <Eye size={18} />
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </Card>
 
-          {/* Quick Stats */}
-          <Card>
-            <h2 className="text-xl font-semibold mb-4">System Overview</h2>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="p-4 bg-blue-50 rounded-lg">
-                <p className="text-sm text-gray-600">Sites with Active Meetings</p>
-                <p className="text-2xl font-bold text-blue-600">
-                  {new Set(meetings.map((m: any) => m.site_id)).size}
-                </p>
-              </div>
-              <div className="p-4 bg-green-50 rounded-lg">
-                <p className="text-sm text-gray-600">Avg Staff per Site</p>
-                <p className="text-2xl font-bold text-green-600">
-                  {sites.length > 0 ? (staff.length / sites.length).toFixed(1) : '0'}
-                </p>
-              </div>
-            </div>
-          </Card>
         </>
       )}
     </div>
