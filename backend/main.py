@@ -3,11 +3,17 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 from app.config import settings
-from app.database import init_db
-from app.api.endpoints import sites, staff, meetings, contracts, vehicles
+from app.database import init_db, get_db
+from app.api.endpoints import sites, staff, meetings, contracts, vehicles, auth
+from app.crud.user import create_default_admin
 
 # Initialize database
 init_db()
+
+# Create default admin user if no users exist
+db = next(get_db())
+create_default_admin(db)
+db.close()
 
 # Create FastAPI app
 app = FastAPI(
@@ -31,6 +37,7 @@ uploads_path.mkdir(exist_ok=True)
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 # Include routers
+app.include_router(auth.router)
 app.include_router(sites.router)
 app.include_router(staff.router)
 app.include_router(meetings.router)
