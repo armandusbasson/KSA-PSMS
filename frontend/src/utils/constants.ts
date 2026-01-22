@@ -1,4 +1,24 @@
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+// Dynamically determine API URL based on current hostname
+// This ensures frontend always connects to the backend on the same server
+const getApiBaseUrl = () => {
+  // Use environment variable if explicitly set
+  if (import.meta.env.VITE_API_BASE_URL) {
+    return import.meta.env.VITE_API_BASE_URL;
+  }
+  
+  // Otherwise, use the current hostname with port 8000
+  // This works for both localhost development and production
+  if (typeof window !== 'undefined') {
+    const protocol = window.location.protocol; // http: or https:
+    const hostname = window.location.hostname; // localhost or server IP/domain
+    return `${protocol}//${hostname}:8000`;
+  }
+  
+  // Fallback for SSR or build time
+  return 'http://localhost:8000';
+};
+
+export const API_BASE_URL = getApiBaseUrl();
 
 export const API_ENDPOINTS = {
   // Sites
